@@ -773,3 +773,9 @@ input, textarea { font: inherit; color: inherit; }
 .footer-logo { width: min(100%, calc(50vh * 1.519)); margin: 28px auto 18px; }
 .pint { padding: 7px 8px; width: 50px; height: 80px; right: 14px; bottom: 18px; border-radius: 14px; background: rgba(18,17,16,.55); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
 @media (max-width: 760px) { .pint { width: 40px; height: 64px; right: 10px; bottom: 12px; padding: 6px; } }
+.header-nav a { white-space: nowrap; }
+@media (max-width: 1180px) {
+  .header-nav { display: none; }
+  .burger { display: block; }
+  .header .btn-join { display: none; }
+}
