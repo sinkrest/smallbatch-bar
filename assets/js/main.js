@@ -266,7 +266,7 @@
     addEventListener('scroll', () => {
       const y = scrollY;
       header.classList.toggle('is-solid', y > 60);
-      header.classList.toggle('is-hidden', y > lastY && y > 400 && !document.body.classList.contains('menu-open'));
+      if (!document.body.classList.contains('is-locked')) header.classList.toggle('is-hidden', y > lastY && y > 400 && !document.body.classList.contains('menu-open'));
       lastY = y;
     }, { passive: true });
 
@@ -557,7 +557,7 @@
     // split NO BORING BEER into chars
     $$('#heroAfter .ln').forEach((ln) => { ln.innerHTML = [...ln.textContent].map((c) => (c === ' ' ? ' ' : `<span class="char">${c}</span>`)).join(''); });
 
-    if (!hasGSAP || reduced) { st.intro = 1; apply(); return { intro: () => {} }; }
+    if (!hasGSAP || reduced) { st.intro = 1; apply(); return { intro: () => $('#header').classList.remove('is-hidden') }; }
 
     const tl = gsap.timeline({
       scrollTrigger: { trigger: hero, start: 'top top', end: () => '+=' + Math.round(innerHeight * 1.5), scrub: 0.7, pin: true, anticipatePin: 1, invalidateOnRefresh: true }
@@ -576,7 +576,7 @@
         gsap.fromTo(st, { intro: 0 }, { intro: 1, duration: 1.8, ease: 'expo.out', onUpdate: apply });
         gsap.from('.hero-kicker > *', { yPercent: 120, opacity: 0, duration: 1.1, stagger: 0.08, ease: 'expo.out', delay: 0.2 });
         gsap.from('.hero-corner, .hero-scroll, .motion-toggle', { y: 30, opacity: 0, duration: 1.1, stagger: 0.06, ease: 'expo.out', delay: 0.35 });
-        gsap.from('#header', { yPercent: -100, duration: 1.1, ease: 'expo.out', delay: 0.3 });
+        setTimeout(() => $('#header').classList.remove('is-hidden'), 300);
       }
     };
   }
