@@ -1,68 +1,63 @@
-# Small Batch Nexø — website
+# Small Batch Nexø – website
 
-A one-page site for **Small Batch**, the experimental brewery and bar at Ndr. Strandvej 6, Nexø Havn, Bornholm,
-with a membership concept called **Hane 21** ("20 taps on the beer altar. The 21st is yours.").
+A one-page site for **Small Batch**, the experimental brewery and bar at Ndr. Strandvej 6, Nexø Havn, Bornholm.
+It is tied into the **Small Batch Club** concept (`website-uplifts/small-batch`, live at
+https://small-batch-koncept.vercel.app/klubben/): same member card, same three memberships, same welcome pack,
+and every join button links straight to the club page.
 
-Static HTML/CSS/JS. No build step. GSAP + ScrollTrigger and Lenis come from CDNs.
+Static HTML/CSS/JS, no build step. GSAP, ScrollTrigger and Lenis are vendored in `assets/vendor/`, so there are no CDN or Google calls.
 
 ## What's on the page
 
 | # | Section | What it does |
 |---|---|---|
-| — | **The door** | A loader where the SMALL BATCH lettering fills with beer, then an 18+ age gate (remembered). |
-| — | **Hero** | Live WebGL beer (rising bubbles, cursor ripple) seen *through* the cut-out logo. Scrolling dives into a letter, and "No boring beer." lands. |
-| 01 | Manifest | The bar's own manifesto, revealed word by word on scroll, with photo "pills" inline. |
-| 02 | On tap | A board of real house beers (style, ABV and IBU per Untappd). Names flip like a ferry departure board. Hovering pours the beer into a floating pint. |
-| 03 | The harbour | A pinned, horizontally scrolling gallery of the bar's photos. |
-| 04 | **Hane 21** | The club: a spotlight effect, six perks, three tiers (Praktikant → Mellemleder → Bestyrelsen), a 3D holographic member card that updates live as you type, an invite-code door, the application form, and a "Members only" cellar with a countdown. |
-| 05 | Batch Films | A 21:9 cinema with three reels. It plays Higgsfield videos once they exist, and a cinematic photo sequence with subtitles until then. |
-| 06 | Events | Driven by config. Past events are struck through automatically. |
-| 07 | Find us | A drawn coastline of Bornholm (OpenStreetMap data) with Nexø pinging, plus facts and opening hours. |
-| — | Footer | A sticky reveal of the giant logo on blaze orange. |
+| – | **The door** | The SMALL BATCH lettering fills with beer, then an 18+ gate (remembered). |
+| – | **Hero** | One WebGL pass draws the beer, rising bubbles, a cursor ripple and the logo cut-out (from a signed distance field, so it stays crisp at any zoom). Scrolling dives into a letter, then "No boring beer." lands. |
+| 01 | Manifest | The bar's manifesto, revealed word by word, with photo pills. |
+| 02 | On tap | House beers from light to dark. % vol. and IBU are shown neutrally. Names flip in; hovering pours the beer into a floating glass. |
+| 03 | The harbour | A pinned, horizontally scrolling photo gallery. |
+| 04 | **Small Batch Club** | "Lille. Med vilje." with: <ul><li>the number picker</li><li>the concept's matte-black member card with the foil Nº</li><li>the wooden bottle the number burns into</li><li>the welcome pack shelf and the tee with its live chest print</li><li>Medlem / Stamgæst / Bryggerens bord</li><li>the four club evenings</li></ul> Every CTA opens the concept's club page. |
+| 05 | Batch Films | Three reels: Higgsfield videos when they exist, a cinematic photo sequence until then. |
+| 06 | Events | Driven by config. Past events are struck through. |
+| 07 | Find us | Bornholm drawn from OpenStreetMap, plus the facts. |
+| – | Footer | A sticky orange reveal of the logo. |
 
-Global touches:
-- custom cursor with labels, magnetic buttons, film grain, a velocity-reactive marquee
-- a scroll-progress **pint glass** that fills as you read
-- DA/EN toggle
-- a *Pause motion* button, and full `prefers-reduced-motion` support
-- easter eggs: type `ipa` or `kpi`
+## Rules carried over from the club concept
 
-## Editing content
+- **Fonts:** Instrument Sans and Rokkitt only (OFL, self-hosted). The bar's Lovely Mess and FK Grotesk are licensed and are not used. The SMALL BATCH lettering appears only as the SVG wordmark, which is art.
+- **Dashes:** only short dashes (–), never em dashes.
+- **Alcohol:** % vol. is shown neutrally, never as a selling point. No "strong", no amounts, no "gratis".
+- **Photos:**
+  - `hug-nexo` and `red-woman` are deselected and removed.
+  - The club section uses neither `bar-pour` nor `sunset-drinks`.
+- **Hours:** opening hours are never stated, because they aren't published. Leave `hours` as `null`.
+- **The Nº sign:** it is built as `N` plus a small underlined `o`, because the fonts have no U+2116.
+- **Honesty:** the club section says it is a concept proposal and not a real club yet.
 
-Everything the team will touch is in **`assets/js/config.js`**:
-- `taps`: the beer board
+## Editing
+
+Everything editable is in **`assets/js/config.js`**:
+- `clubUrl` (DA/EN)
+- `club` (tiers, prices, evenings; mirrors the concept's `club.json`)
+- `taps`
 - `events`
-- `hours`: leave every day `null` until hours are published, and the site says "hours coming soon" instead of faking open/closed
-- `club`: seat counter
-- `nextRelease`: countdown
-- `inviteCodes`
 - `videos`
-- `formEndpoint`
 
-Copy is bilingual inline: Danish in the HTML, English in `data-en="…"`.
+When the club gets its real domain, change `clubUrl`.
 
-## ⚠️ Before this goes live on smallbatch.bar
+## Performance notes
 
-1. **Applications are not collected yet.** `formEndpoint` is empty, so the form runs in demo mode. Point it at Formspree, a Make/Zapier webhook or similar.
-2. **Placeholders to confirm:**
-   - the Mellemleder price (DKK 995 / season)
-   - seats (300 total, 53 taken)
-   - `nextRelease` (6 Nov 2026)
-   - the invite codes
-   - the perk list
-   - which beers are actually on the board
-3. **Opening hours.** These aren't published anywhere yet. Fill in `hours`.
-4. **Fonts.** Lovely Mess and FK Grotesk load from the bar's own Webflow CDN, so the files aren't copied into this repo. Check the font licences cover the new host and domain.
-5. **Invite codes are front-end theatre.** They only change the card visually; any real gating needs a server.
-6. **Social.** The Instagram/Facebook handles (`smallbatchnexo`) come from the current site's metadata. Make sure the accounts exist.
+- The hero is a single WebGL draw with a pixel budget: about 2.4 MP on desktop and 1.1 MP on phones, with the texture downscaled to 1920 px. It sleeps when off screen.
+- No full-screen blend modes and no backdrop blurs. The club spotlight is a pre-painted gradient that only moves with `transform`.
+- Marquees, the club spotlight and the films sleep off screen. The cursor and the pint glass only update when something changes.
 
 ## Videos
 
-See **[HIGGSFIELD.md](HIGGSFIELD.md)** for the prompt pack, slot sizes and the cost estimate.
+See [HIGGSFIELD.md](HIGGSFIELD.md).
 
 ## Credits
 
-- Photos, logo lettering and manifesto © Small Batch.
-- Map data © OpenStreetMap contributors (ODbL).
-- Beer facts are from Untappd and smallbatch.dk.
-- Bar facts are from TV2 Bornholm and Bornholm Nyt (July 2026).
+- Photos, the logo lettering and the manifesto © Small Batch.
+- Club renders (wooden bottle, club beers, tee) and the evening photos come from the Small Batch Club concept. All pack images are sketches.
+- Map data © OpenStreetMap contributors.
+- Beer facts are from Untappd.

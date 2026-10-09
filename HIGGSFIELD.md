@@ -1,4 +1,4 @@
-# Higgsfield video pack — Small Batch Nexø
+# Higgsfield video pack – Small Batch Nexø
 
 The site ships with **designed fallbacks in every video slot** (live WebGL beer, Ken Burns film reels),
 so nothing looks empty today. When the Higgsfield account has credits, render the clips below,
@@ -10,9 +10,10 @@ The full pack (7 clips) is roughly **500 credits**. The account currently has 0 
 **House style for every prompt:** warm blaze-orange (#FF5500) and deep amber against near-black,
 35 mm film grain, shallow depth of field, no on-screen text, no logos, no audio.
 
-> **Consent:** do not image-to-video the photos that show identifiable people (the bartender,
-> the woman in red, the two friends) unless they've agreed to be animated by AI. The prompts below
-> use text-to-video for people shots and only feed non-identifying photos as start frames.
+> **Consent:** do not image-to-video photos that show identifiable people (the bartender) unless
+> they've agreed to be animated by AI. The prompts below use text-to-video for people shots and only
+> feed non-identifying photos as start frames. Club-section rules from the concept apply: no
+> `bar-pour`/`sunset-drinks` there, no amounts, nothing "free".
 
 | Slot | Config key | Format | Model / settings |
 |---|---|---|---|
@@ -20,9 +21,9 @@ The full pack (7 clips) is roughly **500 credits**. The account currently has 0 
 | Hero (phone) | `videos.hero.srcMobile` | 9:16, 10 s, loop | same |
 | Hero by time of day (optional) | `videos.hero.byTime.{morning,day,dusk,night}` | 16:9, 10 s | same |
 | Club background | `videos.club.src` | 16:9, 10 s, loop | `seedance_2_5`, omni_reference with `lightstrip.avif` |
-| Batch Film Nº 01 — Skænket | `videos.films[0].src` | 21:9, 9 s | `seedance_2_5`, t2v |
-| Batch Film Nº 02 — Havnen | `videos.films[1].src` | 21:9, 9 s | `seedance_2_5`, start frame `sunset-drinks.avif` (silhouettes) |
-| Batch Film Nº 03 — Klubben | `videos.films[2].src` | 21:9, 9 s | `seedance_2_5`, t2v |
+| Batch Film Nº 01 – Skænket | `videos.films[0].src` | 21:9, 9 s | `seedance_2_5`, t2v |
+| Batch Film Nº 02 – Havnen | `videos.films[1].src` | 21:9, 9 s | `seedance_2_5`, start frame `sunset-drinks.avif` (silhouettes) |
+| Batch Film Nº 03 – Klubben | `videos.films[2].src` | 21:9, 9 s | `seedance_2_5`, t2v |
 
 Export as H.264 MP4, ≤ 6 MB for the hero and ≤ 8 MB for the films (HandBrake "Web optimized", CRF 24–26).
 
@@ -48,15 +49,15 @@ no cuts, perfectly seamless loop. No text, no logos, no hands, no glass rim visi
 - *dusk*: `…low golden-hour sun behind the glass, saturated orange, long lens flare`
 - *night*: `…lit only by a vertical orange neon strip behind the glass, deep shadows, glowing bubbles`
 
-## 2. Club background: "Hane 21"
+## 2. Club background: "Small Batch Club"
 
 Start frame: `assets/img/lightstrip.avif` (no people). Mode `omni_reference`, role `image_references`.
 
 ```
-A dim industrial bar at night on a Baltic fishing harbour. Raw concrete pillar with a vertical
-orange neon light strip, slow dolly forward toward it, light haze in the air, out-of-focus
-silhouettes laughing softly in the background. Warm orange and ink-black palette, heavy 35mm
-grain, intimate members-only mood. No legible faces, no text.
+A dim industrial bar at night on a Baltic fishing harbour, after closing time. Raw concrete pillar
+with a vertical orange neon light tube, slow dolly forward toward it, light haze in the air. On a
+ledge in front of the tube stands a turned wooden bottle. Warm orange and ink-black palette, heavy
+35mm grain, quiet and intimate. No people, no text.
 ```
 
 ## 3. Batch Film Nº 01: "Skænket" (The Pour)
@@ -81,10 +82,9 @@ sun over a harbour. Silhouettes only, 35mm grain, 21:9 cinematic.
 ## 5. Batch Film Nº 03: "Klubben" (The Club)
 
 ```
-Cinematic 21:9, night. A member's card slides across a dark wooden bar top under a single orange
-light; a hand taps it twice; behind, a hidden 21st tap handle glows and pours a jet-black stout
-in slow motion. Smoke-free haze, deep blacks, orange highlights, 35mm film grain. No faces, no
-text.
+Cinematic 21:9, night. A matte-black member card with an orange foil number slides across a dark
+wooden bar top under a single orange light; beside it a turned wooden bottle with a number burned
+into the wood. Slow push-in, deep blacks, orange highlights, 35mm film grain. No faces, no text.
 ```
 
 ---
