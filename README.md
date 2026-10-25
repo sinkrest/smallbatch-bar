@@ -7,20 +7,28 @@ and every join button links straight to the club page.
 
 Static HTML/CSS/JS, no build step. GSAP, ScrollTrigger and Lenis are vendored in `assets/vendor/`, so there are no CDN or Google calls.
 
-## What's on the page
+## What's on the page (rebuilt 2026-10-25 after a three-reviewer UX pass)
 
 | # | Section | What it does |
 |---|---|---|
-| – | **The door** | The SMALL BATCH lettering fills with beer, then an 18+ gate (remembered). |
-| – | **Hero** | One WebGL pass draws the beer, rising bubbles, a cursor ripple and the logo cut-out (from a signed distance field, so it stays crisp at any zoom). Scrolling dives into a letter, then "No boring beer." lands. |
-| 01 | Manifest | The bar's manifesto, revealed word by word, with photo pills. |
-| 02 | On tap | House beers from light to dark. % vol. and IBU are shown neutrally. Names flip in; hovering pours the beer into a floating glass. |
-| 03 | The harbour | A pinned, horizontally scrolling photo gallery. |
-| 04 | **Small Batch Club** | "Lille. Med vilje." with: <ul><li>the number picker</li><li>the concept's matte-black member card with the foil Nº</li><li>the wooden bottle the number burns into</li><li>the welcome pack shelf and the tee with its live chest print</li><li>Medlem / Stamgæst / Bryggerens bord</li><li>the four club evenings</li></ul> Every CTA opens the concept's club page. |
-| 05 | Batch Films | Three reels: Higgsfield videos when they exist, a cinematic photo sequence until then. |
-| 06 | Events | Driven by config. Past events are struck through. |
-| 07 | Find us | Bornholm drawn from OpenStreetMap, plus the facts. |
-| – | Footer | A sticky orange reveal of the logo. |
+| – | **The door** | The SMALL BATCH lettering fills with beer, then an 18+ gate. Returning visitors are through in under half a second. Deep links (`/#club`) land on their section after the gate. |
+| – | **Hero** | One WebGL pass: beer, bubbles, cursor ripple and the logo cut-out from a signed distance field. Scrolling dives into a letter, then "No boring beer." lands. Bottom right: "Small Batch Club · 150 numre i 2027 ↓". |
+| 01 | Manifest | The bar's own text, revealed word by word. |
+| 02 | **Small Batch Club** | <ul><li>"150 numre. Skriv dig op først." with the 300-mark board (001–030 the table, 031–150 open in 2027, 151–300 in 2028)</li><li>the kit under one light: the concept's member card, the wooden bottle with »Nº 047 · 2027« burned in, Batch 01/02 and the tee's chest print. Visitors try a number (001–150) and a name.</li><li>the price ladder (995 / 1.995 / 3.995 kr., guest tickets, the 30 table seats)</li><li>the four evenings</li><li>ONE button to Stifterlisten, with the honest concept line</li></ul> |
+| 03 | On tap | House beers from light to dark, in the brewery's own words, % vol. and IBU neutral. Split-flap names; hovering pours the beer into a floating glass. |
+| 04 | The harbour | A pinned sideways gallery on desktop, a swipe row on phones. |
+| 05 | Find os | The address as headline, the Bornholm map and the calendar (past events muted). |
+| – | Footer | Dark, with the wordmark lit orange like the light tube. |
+
+**Phones:** a sticky "Skriv mig op" bar (hidden in the hero, at the club's own button and on the footer), the join button in the header at every width, and the language switch in the menu.
+
+**Batch Films** stays hidden until a Higgsfield film is set in `config.js → videos.films`.
+
+**Sign-up tracking:** every button goes to `joinUrl` with its own `?fra=` (`bar-header`, `bar-sticky`, `bar-club`, `bar-footer`). Stifterlisten stores that as the source.
+
+**Links:** `?lang=da` / `?lang=en` forces the language.
+
+**QA:** `node tools/shot.mjs <url> <outdir> 1440 900` and `… 390 844 mobile` save headless screenshots (still mode: `?still=1` skips the door, reduced motion lays out the pinned parts).
 
 ## Rules carried over from the club concept
 
@@ -38,7 +46,7 @@ Static HTML/CSS/JS, no build step. GSAP, ScrollTrigger and Lenis are vendored in
 
 Everything editable is in **`assets/js/config.js`**:
 - `clubUrl` (DA/EN)
-- `club` (tiers, prices, evenings; mirrors the concept's `club.json`)
+- `joinUrl` (Stifterlisten) and `club` (tiers with one-line summaries, prices, guest tickets, founders 150 / 300, evenings; mirrors the concept's `club.json` + `CLAUDE.md`)
 - `taps`
 - `events`
 - `videos`

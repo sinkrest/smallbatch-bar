@@ -11,6 +11,7 @@
   const C = window.SB_CONFIG || {};
   const $ = (s, r = document) => r.querySelector(s);
   const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  const still = /[?&]still=1/.test(location.search);        // QA screenshots
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const fine = matchMedia('(hover: hover) and (pointer: fine)').matches;
   const hasGSAP = !!(window.gsap && window.ScrollTrigger);
@@ -21,7 +22,8 @@
     get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
     set(k, v) { try { localStorage.setItem(k, v); } catch (e) { /* private mode */ } }
   };
-  const NO = '<span class="no">N<span>o</span></span>';   // the club's Nº (fonts have no U+2116)
+  // the club's Nº (the fonts have no U+2116) – read as "Nr." by screen readers
+  const NO = '<span class="no" aria-hidden="true">N<span>o</span></span><span class="sr-only">Nr. </span>';
 
   let lang = 'da';
   let motionPaused = store.get('sb-motion') === 'off';
@@ -31,7 +33,7 @@
 
   if (hasGSAP) gsap.registerPlugin(ScrollTrigger);
 
-  /* ---------- one frame loop; jobs return nothing and gate themselves ---------- */
+  /* ---------- one frame loop; jobs gate themselves ---------- */
   const tickers = new Set();
   let last = performance.now();
   function frame(now) {
@@ -49,7 +51,7 @@
      I18N – Danish in the markup, English in data-en
      ====================================================================== */
   const I18N_ATTRS = ['placeholder', 'aria-label', 'alt'];
-  const CURSOR_LABELS = { Skål: 'Cheers', Klub: 'Club', Pause: 'Pause', Play: 'Play', Skænk: 'Pour' };
+  const CURSOR_LABELS = { Klub: 'Club', Pause: 'Pause', Play: 'Play', Skænk: 'Pour' };
   const renderers = [];
 
   function initI18n() {
@@ -58,9 +60,10 @@
       if (!el.hasAttribute(`data-da-${a}`)) el.setAttribute(`data-da-${a}`, el.getAttribute(a) || '');
     }));
     $$('.lang button').forEach((b) => b.addEventListener('click', () => setLang(b.dataset.lang)));
+    const forced = (location.search.match(/[?&]lang=(da|en)\b/) || [])[1];   // shareable ?lang=da / ?lang=en
     const saved = store.get('sb-lang');
     const nav = (navigator.language || 'da').toLowerCase();
-    setLang(saved || (/^(da|nb|no|nn)/.test(nav) ? 'da' : 'en'), true);
+    setLang(forced || saved || (/^(da|nb|no|nn)/.test(nav) ? 'da' : 'en'), true);
   }
 
   function setLang(l, initial) {
@@ -70,14 +73,18 @@
     $$('[data-en]').forEach((el) => { const v = lang === 'en' ? el.dataset.en : el.dataset.da; if (el.innerHTML !== v) el.innerHTML = v; });
     I18N_ATTRS.forEach((a) => $$(`[data-en-${a}]`).forEach((el) => el.setAttribute(a, el.getAttribute(lang === 'en' ? `data-en-${a}` : `data-da-${a}`))));
     $$('.lang button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.lang === lang)));
-    $('.pint-tip').textContent = T('Skål!', 'Cheers!');
     renderers.forEach((fn) => fn(initial));
     if (!initial && hasGSAP) requestAnimationFrame(() => ScrollTrigger.refresh());
   }
 
-  /* links into the club concept, per language */
+  /* every way into the club: the founders' list (with its own ?fra= per
+     placement, so the club can see which button works) or the full club page */
+  function joinHref(placement) { return (C.joinUrl || '#club') + '?fra=' + encodeURIComponent(placement || 'hjemmeside'); }
   function clubHref(anchor = '') { const u = C.clubUrl || {}; return (u[lang] || u.da || '#club') + (anchor || ''); }
-  renderers.push(() => $$('[data-club-link]').forEach((a) => { a.href = clubHref(a.dataset.clubLink); }));
+  renderers.push(() => {
+    $$('[data-join]').forEach((a) => { a.href = joinHref(a.dataset.join); });
+    $$('[data-club-link]').forEach((a) => { a.href = clubHref(a.dataset.clubLink); });
+  });
 
   /* ======================================================================
      UTILITIES – toast, bubble burst, scramble
@@ -134,30 +141,15 @@
   }
 
   /* ======================================================================
-     HOURS / STATUS – hours are not published, so say nothing about them
+     HOURS – not published, so the site never states them
      ====================================================================== */
-  const hours = C.hours || {};
-  const hoursKnown = Object.values(hours).some(Boolean);
-  const DAYS = { da: ['Søndag', 'Mandag', 'Tirsdag', 'Onsdag', 'Torsdag', 'Fredag', 'Lørdag'], en: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'] };
-  function renderStatus() {
-    $('#status').className = 'status is-info';
-    $('#statusText').textContent = T('20 haner · Nexø Havn', '20 taps · Nexø Havn');
-  }
   function renderHours() {
-    const box = $('#hours');
-    if (!hoursKnown) {
-      box.className = 'hours-follow';
-      box.innerHTML = T(`Følg <a href="${C.social.instagram}" target="_blank" rel="noopener">@smallbatchnexo</a> for nyt fra baren.`, `Follow <a href="${C.social.instagram}" target="_blank" rel="noopener">@smallbatchnexo</a> for news from the bar.`);
-      return;
-    }
-    box.className = 'hours';
-    const today = new Date().getDay();
-    box.innerHTML = [1, 2, 3, 4, 5, 6, 0].map((d) => `<div class="hours-row${d === today ? ' is-today' : ''}"><span>${DAYS[lang][d]}</span><span>${hours[d] ? `${hours[d][0]} – ${hours[d][1]}` : T('Lukket', 'Closed')}</span></div>`).join('');
+    $('#hours').innerHTML = T(`Følg <a href="${C.social.instagram}" target="_blank" rel="noopener">@smallbatchnexo</a> for nyt fra baren.`, `Follow <a href="${C.social.instagram}" target="_blank" rel="noopener">@smallbatchnexo</a> for news from the bar.`);
   }
-  renderers.push(renderStatus, renderHours);
+  renderers.push(renderHours);
 
   /* ======================================================================
-     CURSOR · MAGNETIC · NAV · PINT · MOTION TOGGLE
+     CURSOR · MAGNETIC · NAV · PINT · JOIN BAR · MOTION TOGGLE
      ====================================================================== */
   function initCursor() {
     if (!fine || reduced) return;
@@ -167,7 +159,7 @@
     addEventListener('pointermove', (e) => { mx = e.clientX; my = e.clientY; dot.style.transform = `translate3d(${mx}px,${my}px,0)`; moving = true; }, { passive: true });
     document.addEventListener('pointerover', (e) => {
       const lab = e.target.closest('[data-cursor-label]');
-      const hov = e.target.closest('a, button, [role="button"], label, #tapBoard .tap, .mcard');
+      const hov = e.target.closest('a, button, [role="button"], label, #tapBoard .tap');
       if (lab) { const t = lab.dataset.cursorLabel; label.textContent = lang === 'en' ? (CURSOR_LABELS[t] || t) : t; cur.classList.add('is-label'); cur.classList.remove('is-hover'); }
       else { cur.classList.remove('is-label'); cur.classList.toggle('is-hover', !!hov); }
     });
@@ -191,11 +183,11 @@
     });
   }
 
-  function scrollToTarget(hash) {
-    if (hash === '#top' || hash === '#') { lenis ? lenis.scrollTo(0, { duration: 1.4 }) : scrollTo({ top: 0, behavior: reduced ? 'auto' : 'smooth' }); return; }
+  function scrollToTarget(hash, instant) {
+    if (hash === '#top' || hash === '#') { lenis ? lenis.scrollTo(0, { duration: 1.4, immediate: instant }) : scrollTo({ top: 0, behavior: reduced || instant ? 'auto' : 'smooth' }); return; }
     const el = document.querySelector(hash); if (!el) return;
-    if (lenis) lenis.scrollTo(el, { offset: -70, duration: 1.4 });
-    else scrollTo({ top: el.getBoundingClientRect().top + scrollY - 70, behavior: reduced ? 'auto' : 'smooth' });
+    if (lenis) lenis.scrollTo(el, { offset: -70, duration: 1.4, immediate: instant });
+    else scrollTo({ top: el.getBoundingClientRect().top + scrollY - 70, behavior: reduced || instant ? 'auto' : 'smooth' });
   }
 
   function initNav() {
@@ -206,7 +198,7 @@
       requestAnimationFrame(() => {
         const y = scrollY; ticking = false;
         header.classList.toggle('is-solid', y > 60);
-        if (!document.body.classList.contains('is-locked')) header.classList.toggle('is-hidden', y > lastY && y > 400 && !document.body.classList.contains('menu-open'));
+        if (!document.body.classList.contains('is-locked')) header.classList.toggle('is-hidden', y > lastY + 4 && y > 500 && !document.body.classList.contains('menu-open'));
         lastY = y;
       });
     }, { passive: true });
@@ -223,6 +215,7 @@
       const hash = a.getAttribute('href');
       if (hash === '#main') return;
       e.preventDefault(); setMenu(false); scrollToTarget(hash);
+      history.replaceState(null, '', hash === '#top' ? location.pathname + location.search : hash);
     });
   }
 
@@ -235,10 +228,26 @@
       const p = max > 0 ? clamp(scrollY / max, 0, 1) : 0;
       const top = 62 - p * 58;
       beer.setAttribute('y', top.toFixed(1)); foam.setAttribute('y', (top - 3.5).toFixed(1)); foam.setAttribute('height', p > 0.02 ? '4.5' : '0');
-      pint.classList.toggle('is-on', scrollY > 300); pint.classList.toggle('is-full', p > 0.985);
+      pint.classList.toggle('is-on', scrollY > 300);
     };
     addEventListener('scroll', () => { if (!queued) { queued = true; requestAnimationFrame(update); } }, { passive: true });
     update();
+    whileVisible($('#footer'), (on) => pint.classList.toggle('is-off', on), '0px 0px -20% 0px');
+  }
+
+  /* phone: one sticky way into the club – hidden in the hero, and while the
+     club's own button or the footer is on screen (one filled button per view) */
+  function initJoinBar() {
+    const bar = $('#joinbar'), btn = $('a', bar);
+    const hide = { cta: false, foot: false, hero: true };
+    const apply = () => {
+      const on = !hide.cta && !hide.foot && !hide.hero && !document.body.classList.contains('menu-open');
+      bar.classList.toggle('is-on', on); bar.setAttribute('aria-hidden', String(!on)); btn.tabIndex = on ? 0 : -1;
+    };
+    whileVisible($('#top'), (v) => { hide.hero = v; apply(); });
+    whileVisible($('#clubCta'), (v) => { hide.cta = v; apply(); });
+    whileVisible($('#footer'), (v) => { hide.foot = v; apply(); }, '0px 0px -20% 0px');
+    $('#burger').addEventListener('click', () => setTimeout(apply, 10));
   }
 
   function initMotionToggle() {
@@ -246,7 +255,7 @@
     const apply = () => {
       document.documentElement.classList.toggle('motion-paused', motionPaused);
       btn.setAttribute('aria-pressed', String(motionPaused));
-      txt.textContent = motionPaused ? T('Start bevægelse', 'Play motion') : T('Pause bevægelse', 'Pause motion');
+      txt.textContent = motionPaused ? T('Start bevægelse', 'Play motion') : T('Stop bevægelse', 'Pause motion');
     };
     btn.addEventListener('click', () => { motionPaused = !motionPaused; store.set('sb-motion', motionPaused ? 'off' : 'on'); apply(); });
     renderers.push(apply);
@@ -325,11 +334,10 @@
         col+=(b1.z*.55+b2.z*.35)*vec3(1.,.86,.62);
         col+=(b1.w+b2.w*.7)*.9;
         col*=vec3(1.05,.98,.9);
-        col+=vec3(1.,.42,.08)*exp(-dist*3.5)*.14;
+        col+=vec3(1.,.42,.08)*exp(-dist*3.5)*.12;
         float v=smoothstep(1.3,.2,length((vUv-.5)*vec2(asp.x*.75,1.)));
         col*=mix(.4,1.,v);
         col*=uFade;
-        // logo cut-out from the SDF (logo units; + inside)
         vec2 css=vec2(gl_FragCoord.x, uRes.y-gl_FragCoord.y)/uDpr;
         vec2 L=(css-uLogo.xy)/uLogo.z;
         vec2 suv=(L+${SDF.pad.toFixed(1)})/vec2(${SDF.w.toFixed(1)},${SDF.h.toFixed(1)});
@@ -337,8 +345,8 @@
         if(suv.x>0.&&suv.x<1.&&suv.y>0.&&suv.y<1.) sd=(texture2D(uSdf,suv).r-.5)*${(SDF.range * 2).toFixed(1)};
         float aa=.9/uLogo.z;
         float inL=smoothstep(-aa,aa,sd);
-        float glow=exp(-max(-sd,0.)*uLogo.z/16.)*smoothstep(${(SDF.range * 0.9).toFixed(1)},0.,-sd)*(1.-inL);
-        vec3 veil=vec3(.067,.055,.043)+vec3(1.,.4,.08)*glow*.28*uGlow;
+        float glow=exp(-max(-sd,0.)*uLogo.z/10.)*smoothstep(${(SDF.range * 0.9).toFixed(1)},0.,-sd)*(1.-inL);
+        vec3 veil=vec3(.067,.055,.043)+vec3(1.,.42,.1)*glow*.16*uGlow;
         col=mix(col,veil,(1.-inL)*uVeil);
         gl_FragColor=vec4(col,1.);
       }`;
@@ -361,14 +369,11 @@
     };
     const tex = makeTex(0), sdfTex = makeTex(1);
     let imgW = 16, imgH = 9, beerReady = false, sdfReady = false, video = null;
-
     const upload = (unit, t, src, flip, fmt) => {
       gl.activeTexture(gl.TEXTURE0 + unit); gl.bindTexture(gl.TEXTURE_2D, t);
       gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, flip);
       gl.texImage2D(gl.TEXTURE_2D, 0, fmt, fmt, gl.UNSIGNED_BYTE, src);
     };
-
-    // beer still – downscaled once so the GPU samples a sane texture
     const img = new Image();
     img.decoding = 'async';
     img.onload = () => {
@@ -383,7 +388,6 @@
       imgW = src.width || img.naturalWidth; imgH = src.height || img.naturalHeight; beerReady = true; heroState.dirty = true;
     };
     img.src = $('.hero-fallback').currentSrc || $('.hero-fallback').src;
-
     const sdfImg = new Image();
     sdfImg.onload = () => { upload(1, sdfTex, sdfImg, false, gl.LUMINANCE); sdfReady = true; heroState.dirty = true; };
     sdfImg.src = 'assets/img/logo-sdf.png';
@@ -400,7 +404,7 @@
     function resize() {
       const w = canvas.clientWidth, h = canvas.clientHeight;
       dpr = Math.min(devicePixelRatio || 1, 1.5);
-      const budget = isSmall() ? 1.1e6 : 2.4e6;               // pixel budget per frame
+      const budget = isSmall() ? 1.1e6 : 2.4e6;
       if (w * h * dpr * dpr > budget) dpr = Math.sqrt(budget / (w * h));
       canvas.width = Math.round(w * dpr); canvas.height = Math.round(h * dpr);
       gl.viewport(0, 0, canvas.width, canvas.height); heroState.dirty = true;
@@ -425,7 +429,7 @@
       const moved = Math.abs(nx - px) + Math.abs(ny - py) > 1e-5;
       px = nx; py = ny;
       if (video && video.readyState >= 2) { upload(0, tex, video, true, gl.RGB); imgW = video.videoWidth; imgH = video.videoHeight; beerReady = true; heroState.dirty = true; }
-      if (!animate && !moved && !heroState.dirty) return;      // nothing changed: skip the frame
+      if (!animate && !moved && !heroState.dirty) return;
       heroState.dirty = false;
       if (!heroState.gl) { heroState.gl = true; hero.classList.add('gl-on'); }
       gl.uniform1i(U.uTex, 0); gl.uniform1i(U.uSdf, 1);
@@ -467,7 +471,7 @@
     return { x: cx, y: cy, depth: 10 };
   }
 
-  function initHeroMask(glOn) {
+  function initHeroMask() {
     const svg = $('#heroMask'), groups = $$('.m-logo', svg), hero = $('#top');
     const focal = findFocal();
     const st = { z: 0, intro: 0 };
@@ -476,9 +480,9 @@
       const W = hero.clientWidth || innerWidth, H = hero.clientHeight || innerHeight;
       if (!W || !H) return;
       svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
-      const lw = Math.min(W * (isSmall() ? 0.9 : 0.8), 1240, H * 0.58 * (LOGO_W / LOGO_H));
+      const lw = Math.min(W * (isSmall() ? 0.94 : 0.8), 1240, H * 0.58 * (LOGO_W / LOGO_H));
       const k0 = lw / LOGO_W;
-      lay = { W, H, k0, x0: (W - lw) / 2, y0: (H - LOGO_H * k0) / 2 + H * 0.015, Z: (Math.hypot(W, H) / 2) / (focal.depth * k0) * 1.25 };
+      lay = { W, H, k0, x0: (W - lw) / 2, y0: (H - LOGO_H * k0) / 2 + H * 0.0, Z: (Math.hypot(W, H) / 2) / (focal.depth * k0) * 1.25 };
       apply();
     }
     function apply() {
@@ -500,7 +504,8 @@
 
     if (!hasGSAP || reduced) { st.intro = 1; apply(); return { intro: () => { layout(); showHeader(); } }; }
 
-    const tl = gsap.timeline({ scrollTrigger: { trigger: hero, start: 'top top', end: () => '+=' + Math.round(innerHeight * 1.5), scrub: 0.6, pin: true, anticipatePin: 1, invalidateOnRefresh: true } });
+    // a shorter pin on phones
+    const tl = gsap.timeline({ scrollTrigger: { trigger: hero, start: 'top top', end: () => '+=' + Math.round(innerHeight * (isSmall() ? 1.1 : 1.5)), scrub: 0.6, pin: true, anticipatePin: 1, invalidateOnRefresh: true } });
     tl.to(st, { z: 1, duration: 1, ease: 'power2.in', onUpdate: apply }, 0)
       .to('#heroUI', { autoAlpha: 0, y: -40, duration: 0.25, ease: 'none' }, 0)
       .to(heroState, { glow: 0, duration: 0.3, onUpdate: () => { heroState.dirty = true; } }, 0.05)
@@ -514,18 +519,18 @@
       intro() {
         layout();
         gsap.fromTo(st, { intro: 0 }, { intro: 1, duration: 1.8, ease: 'expo.out', onUpdate: apply });
-        gsap.from('.hero-kicker > *', { yPercent: 120, opacity: 0, duration: 1.1, stagger: 0.08, ease: 'expo.out', delay: 0.2 });
-        gsap.from('.hero-corner, .hero-scroll, .motion-toggle', { y: 30, opacity: 0, duration: 1.1, stagger: 0.06, ease: 'expo.out', delay: 0.35 });
+        gsap.from('.hero-kicker', { y: 20, opacity: 0, duration: 1.1, ease: 'expo.out', delay: 0.2 });
+        gsap.from('.hero-bar > *', { y: 30, opacity: 0, duration: 1.1, stagger: 0.06, ease: 'expo.out', delay: 0.35 });
         showHeader();
       }
     };
   }
 
   /* ======================================================================
-     MARQUEES – velocity reactive, asleep off screen
+     MARQUEE – velocity reactive, asleep off screen
      ====================================================================== */
   function initMarquees() {
-    const words = ['No boring beer', 'Mindre KPI', 'Mere IPA', 'Nexø Havn', 'Small Batch Club', 'Small Batch'];
+    const words = ['No boring beer', 'Nexø Havn', 'Small Batch Club', 'Lille. Med vilje.', 'Mindre KPI – Mere IPA'];
     const hop = '<svg viewBox="0 0 32 43" aria-hidden="true"><use href="#sb-hop"/></svg>';
     const tracks = $$('.marquee-track');
     tracks.forEach((t) => { const h = words.map((w) => `<span class="marquee-item">${w}${hop}</span>`).join(''); t.innerHTML = h + h + h; });
@@ -541,19 +546,19 @@
       if (motionPaused) return;
       st.forEach((s) => {
         if (!s.on || !s.w) return;
-        s.x -= (60 + Math.abs(boost) * 90) * s.dir * (boost < -0.2 ? -1 : 1) * dt;
+        s.x -= (55 + Math.abs(boost) * 80) * s.dir * (boost < -0.2 ? -1 : 1) * dt;
         if (s.x <= -s.w) s.x += s.w; if (s.x > 0) s.x -= s.w;
-        s.track.style.transform = `translate3d(${s.x.toFixed(1)}px,0,0) skewX(${clamp(-boost * 2.5, -10, 10).toFixed(2)}deg)`;
+        s.track.style.transform = `translate3d(${s.x.toFixed(1)}px,0,0)`;
       });
     });
   }
 
   /* ======================================================================
-     MANIFEST – scroll-scrubbed word reveal with photo pills
+     01 MANIFEST – scroll-scrubbed word reveal with photo pills
      ====================================================================== */
   const MANIFEST = {
-    da: 'Styrken i at være [beer] lille, lokal [sign] og *anderledes.* Hvor kærligheden til det lille bryg [bar-pour] vinder over ideen om at maksimere bundlinjen. Lige præcis lille nok til at lægge mærke til alle de små ting, [sunset-drinks] der gør en *stor forskel.*',
-    en: 'The strength of being [beer] small, local [sign] and *different.* Where love for the small brew [bar-pour] beats the idea of maximising the bottom line. Just small enough to notice all the little things [sunset-drinks] that make a *big difference.*'
+    da: 'Styrken i at være [firefly] lille, lokal og *anderledes.* Hvor kærligheden til det lille bryg [lightstrip] vinder over ideen om at maksimere bundlinjen. Lige præcis lille nok til at lægge mærke til alle de små ting, [sunset-drinks] der gør en *stor forskel.*',
+    en: 'The strength of being [firefly] small, local and *different.* Where love for the small brew [lightstrip] beats the idea of maximising the bottom line. Just small enough to notice all the little things [sunset-drinks] that make a *big difference.*'
   };
   let manifestTL = null;
   function renderManifest() {
@@ -574,23 +579,133 @@
   renderers.push(renderManifest);
 
   /* ======================================================================
-     TAP BOARD – % vol. shown neutrally, light to dark
+     02 SMALL BATCH CLUB – board, kit (card / bottle / tee), ladder, year
      ====================================================================== */
-  const TAG = { core: ['Kerneøl', 'Core range'], award: ['Prisvinder', 'Award winner'], club: ['Small Batch Club', 'Small Batch Club'] };
-  const fmtAbv = (v) => `${v.toFixed(1).replace('.', lang === 'da' ? ',' : '.')} % vol.`;
+  const club = C.club || { year: 2027, cap: 300, table: 30, founders: 150, nextYear: 2028, tiers: [], evenings: [] };
+  const pad3 = (n) => String(n).padStart(3, '0');
+  const kr = (n) => n.toLocaleString(lang === 'da' ? 'da-DK' : 'en-GB');
+  const MON = { da: ['jan', 'feb', 'mar', 'apr', 'maj', 'jun', 'jul', 'aug', 'sep', 'okt', 'nov', 'dec'], en: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'] };
+  const tierName = (id) => { const t = club.tiers.find((x) => x.id === id); return t ? L(t.name) : id; };
+
+  function initClubLight() {
+    const sec = $('#club'), light = $('#clubLight');
+    if (reduced) { light.style.transform = `translate3d(${sec.clientWidth * 0.7}px, 420px, 0)`; return; }
+    let on = false, pointer = false, tx = 0, ty = 0, x = 0, y = 0, secTop = 0;
+    const measure = () => { secTop = sec.getBoundingClientRect().top + scrollY; };
+    measure(); addEventListener('resize', measure); if (hasGSAP) ScrollTrigger.addEventListener('refresh', measure);
+    whileVisible(sec, (v) => { on = v; if (v) measure(); });
+    sec.addEventListener('pointermove', (e) => { const r = sec.getBoundingClientRect(); tx = e.clientX - r.left; ty = e.clientY - r.top; pointer = true; }, { passive: true });
+    sec.addEventListener('pointerleave', () => { pointer = false; });
+    tickers.add((t) => {
+      if (!on) return;
+      if (!pointer && !motionPaused) { tx = sec.clientWidth * (0.55 + Math.sin(t * 0.35) * 0.3); ty = clamp(scrollY - secTop + innerHeight * (0.45 + Math.cos(t * 0.27) * 0.2), 200, sec.clientHeight - 200); }
+      x = lerp(x, tx, 0.07); y = lerp(y, ty, 0.07);
+      light.style.transform = `translate3d(${x.toFixed(1)}px,${y.toFixed(1)}px,0)`;
+    });
+  }
+
+  /* the board: 300 marks drawn by hand – 001–030 the table, 031–150 open in
+     2027, 151–300 in 2028. Structure only; never a count of taken numbers. */
+  function initTally() {
+    const box = $('#tallyMarks'), fig = $('#tally');
+    let seed = 7;
+    const rnd = () => ((seed = (seed * 9301 + 49297) % 233280) / 233280);
+    let html = '';
+    for (let n = 1; n <= club.cap; n++) {
+      if (n === club.founders + 1) html += `<b class="tally-split" aria-hidden="true">${club.nextYear}</b>`;
+      const cls = n <= club.table ? 'is-bord' : n > club.founders ? 'is-next' : '';
+      html += `<i class="${cls}" style="--t:${((rnd() - 0.5) * 7).toFixed(1)}deg;--d:${(n * 0.004).toFixed(3)}s"></i>`;
+    }
+    box.innerHTML = html;
+    if (reduced || still) { fig.classList.add('is-in'); return; }
+    onVisible(fig, () => fig.classList.add('is-in'), { threshold: 0.35 });
+  }
+
+  const card = { n: 47, name: '' };
+  function renderCard(animate) {
+    const n = pad3(card.n), table = card.n <= club.table;
+    const num = $('#mcardNum');
+    if (num.textContent !== n) { num.textContent = n; if (animate && !reduced) { num.classList.remove('is-foil'); void num.offsetWidth; num.classList.add('is-foil'); } }
+    $$('.js-num').forEach((el) => { el.textContent = n; });
+    $$('.js-num-svg').forEach((el) => { el.textContent = n; });
+    if (animate && !reduced) { const wb = $('#wbNum'); wb.classList.remove('is-burning'); void wb.offsetWidth; wb.classList.add('is-burning'); }
+    $('#mcardName').textContent = card.name || T('Dit navn', 'Your name');
+    $('#mcardTier').textContent = table ? tierName('bord') : tierName('medlem');
+    $('#mcardYear').textContent = T(`Klubåret ${club.year}`, `Club year ${club.year}`);
+    $('#mcard').classList.toggle('is-table', table);
+    const note = $('#cNote');
+    note.classList.toggle('is-table', table);
+    note.innerHTML = table
+      ? T(`${NO} ${n} er en plads ved Bryggerens bord. Skriv det som dit ønske på stifterlisten – numrene går i den rækkefølge, I skriver jer op.`, `${NO} ${n} is a seat at the Brewer's Table. Put it down as your wish on the founders' list – numbers go in sign-up order.`)
+      : T(`Skriv ${NO} ${n} som dit ønske på stifterlisten. I ${club.year} åbner ${NO} 001–${pad3(club.founders)}, og numrene går i den rækkefølge, I skriver jer op.`, `Put ${NO} ${n} down as your wish on the founders' list. In ${club.year} ${NO} 001–${pad3(club.founders)} open, and numbers go in sign-up order.`);
+  }
+
+  function initClubCard() {
+    const num = $('#cNum'), name = $('#cName'), inner = $('#mcard .mcard-in');
+    const commit = (animate) => {
+      const v = parseInt(num.value.replace(/\D/g, ''), 10);
+      if (Number.isFinite(v) && v >= 1 && v <= club.founders) { card.n = v; num.value = pad3(v); renderCard(animate); }
+      else { num.value = pad3(card.n); $('#cNote').innerHTML = T(`I ${club.year} åbner ${NO} 001–${pad3(club.founders)}. ${NO} ${pad3(club.founders + 1)}–${pad3(club.cap)} åbner i ${club.nextYear}.`, `In ${club.year} ${NO} 001–${pad3(club.founders)} open. ${NO} ${pad3(club.founders + 1)}–${pad3(club.cap)} open in ${club.nextYear}.`); }
+    };
+    num.addEventListener('input', () => { num.value = num.value.replace(/\D/g, '').slice(0, 3); });
+    num.addEventListener('change', () => commit(true));
+    num.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); commit(true); } });
+    name.addEventListener('input', () => { card.name = name.value.trim(); $('#mcardName').textContent = card.name || T('Dit navn', 'Your name'); });
+    // one calm roll within the open founders' numbers (never a "random"/game wording)
+    $('#cSuggest').addEventListener('click', () => {
+      const target = club.table + 1 + Math.floor(Math.random() * (club.founders - club.table));
+      if (reduced || !hasGSAP) { card.n = target; num.value = pad3(target); renderCard(true); return; }
+      const o = { v: card.n };
+      gsap.to(o, { v: target, duration: 0.9, ease: 'power3.out', onUpdate: () => { num.value = pad3(Math.round(o.v)); $('#mcardNum').textContent = pad3(Math.round(o.v)); }, onComplete: () => { card.n = target; renderCard(true); } });
+    });
+    if (fine && !reduced) {
+      const stage = $('.kit-stage');
+      const rest = () => { inner.style.setProperty('--rx', '6deg'); inner.style.setProperty('--ry', '-12deg'); };
+      $('#kit').addEventListener('pointermove', (e) => {
+        const r = stage.getBoundingClientRect();
+        const x = clamp((e.clientX - r.left) / r.width - 0.5, -0.8, 0.8), y = clamp((e.clientY - r.top) / r.height - 0.5, -0.8, 0.8);
+        inner.style.setProperty('--rx', `${(6 - y * 14).toFixed(1)}deg`); inner.style.setProperty('--ry', `${(-12 + x * 18).toFixed(1)}deg`);
+        inner.style.setProperty('--mx', `${(50 + x * 90).toFixed(0)}%`); inner.style.setProperty('--my', `${(50 + y * 90).toFixed(0)}%`);
+      });
+      $('#kit').addEventListener('pointerleave', rest);
+    }
+    onVisible($('.kit-stage'), () => renderCard(true), { threshold: 0.5 });
+  }
+
+  function renderLadder() {
+    $('#ladder').innerHTML = club.tiers.map((t) => `
+      <li class="rung rung-${t.id}">
+        <span class="rung-name">${L(t.name)}</span>
+        <span class="rung-one">${L(t.one)}</span>
+        <span class="rung-guest">${t.guest ? T(`+${t.guest} gæst${t.guest > 1 ? 'er' : ''} om året`, `+${t.guest} guest${t.guest > 1 ? 's' : ''} a year`) : ''}</span>
+        <span class="rung-price"><b>${kr(t.price)}</b>kr.</span>
+        ${t.seats ? `<span class="rung-seats" role="img" aria-label="${T(`${t.seats} pladser ved bordet`, `${t.seats} seats at the table`)}">${'<i></i>'.repeat(t.seats)}</span>` : ''}
+      </li>`).join('');
+  }
+  function renderYear() {
+    const who = (ids) => (ids.length === club.tiers.length ? T('Hele klubben', 'The whole club') : ids.map(tierName).join(' · '));
+    $('#yearline').innerHTML = club.evenings.map((e) => `
+      <li><span class="m">${MON[lang][e.m - 1]} ${club.year}</span><b>${L(e.name)}</b><span class="who">${who(e.for)}</span></li>`).join('');
+  }
+  renderers.push(() => renderCard(false), renderLadder, renderYear);
+
+  /* ======================================================================
+     03 TAP BOARD – % vol. shown neutrally, light to dark
+     ====================================================================== */
+  const fmtAbv = (v) => `${v.toFixed(1).replace('.', lang === 'da' ? ',' : '.')} %`;
   let tapIO = null;
   function renderTaps() {
     const board = $('#tapBoard');
     board.innerHTML = (C.taps || []).map((b, i) => {
       const dark = parseInt(b.color.slice(1, 3), 16) < 80;
-      const tag = TAG[b.tag] || TAG.core;
+      const tag = b.tag === 'award' ? L(b.award) : b.tag === 'club' ? 'Small Batch Club' : '';
       return `<div class="tap${b.locked ? ' is-locked' : ''}" role="listitem" tabindex="0" style="--c:${b.color};--hc:${dark ? '#d8b98f' : b.color}" data-i="${i}" data-cursor-label="${b.locked ? 'Klub' : 'Skænk'}">
         <span class="tap-no">${String(i + 1).padStart(2, '0')}</span>
         <span class="tap-name" data-name="${b.name}">${b.name}</span>
         <span class="tap-style">${L(b.style)}<small>${L(b.notes)}</small></span>
         <span class="tap-abv">${b.locked ? '–' : fmtAbv(b.abv)}</span>
-        <span class="tap-ibu"><span class="bar"><i style="--lvl:${b.locked ? 100 : clamp(b.ibu / 60, 0, 1) * 100}%"></i></span><span>${b.locked ? T('Kun medlemmer', 'Members only') : 'IBU ' + b.ibu}</span></span>
-        <span class="tap-tag is-${b.tag || 'core'}">${lang === 'en' ? tag[1] : tag[0]}</span>
+        <span class="tap-ibu"><span class="bar"><i style="--lvl:${b.locked ? 100 : clamp(b.ibu / 60, 0, 1) * 100}%"></i></span><span>${b.locked ? T('Kun klubben', 'Club only') : 'IBU ' + b.ibu}</span></span>
+        <span class="tap-tag${b.tag ? ' is-' + b.tag : ''}">${tag}</span>
       </div>`;
     }).join('');
     if (tapIO) tapIO.disconnect();
@@ -621,7 +736,7 @@
     let mx = 0, my = 0, gx = 0, gy = 0, vx = 0, on = false, level = 0, target = 0, waveX = 0;
     addEventListener('pointermove', (e) => { mx = e.clientX; my = e.clientY; }, { passive: true });
     board.addEventListener('pointerover', (e) => {
-      const row = e.target.closest('.tap'); if (!row) return;
+      const row = e.target.closest('.tap'); if (!row || row.classList.contains('is-locked')) return;
       const b = C.taps[Number(row.dataset.i)];
       const dark = parseInt(b.color.slice(1, 3), 16) < 80;
       beer.setAttribute('fill', b.color); foam.setAttribute('fill', dark ? '#d8b98f' : '#f6efe2');
@@ -645,7 +760,7 @@
   }
 
   /* ======================================================================
-     HARBOUR – pinned horizontal gallery
+     04 HARBOUR – pinned horizontal gallery (desktop)
      ====================================================================== */
   function initHarbour() {
     if (!hasGSAP || reduced) return;
@@ -663,198 +778,74 @@
   }
 
   /* ======================================================================
-     SMALL BATCH CLUB – spotlight, number → card / bottle / tee, tiers, year
-     ====================================================================== */
-  const club = C.club || { year: 2027, cap: 300, table: 30, tiers: [], evenings: [] };
-  const pad3 = (n) => String(n).padStart(3, '0');
-  const kr = (n) => n.toLocaleString(lang === 'da' ? 'da-DK' : 'en-GB');
-  const MONTHS = { da: ['januar', 'februar', 'marts', 'april', 'maj', 'juni', 'juli', 'august', 'september', 'oktober', 'november', 'december'], en: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'] };
-  const tierName = (id) => { const t = club.tiers.find((x) => x.id === id); return t ? L(t.name) : id; };
-
-  function initClubLight() {
-    const sec = $('#club'), light = $('#clubLight');
-    if (reduced) { light.style.transform = `translate3d(${sec.clientWidth * 0.7}px, 300px, 0)`; return; }
-    let on = false, pointer = false, tx = 0, ty = 0, x = 0, y = 0, secTop = 0;
-    const measure = () => { secTop = sec.getBoundingClientRect().top + scrollY; };
-    measure(); addEventListener('resize', measure); if (hasGSAP) ScrollTrigger.addEventListener('refresh', measure);
-    whileVisible(sec, (v) => { on = v; if (v) measure(); });
-    sec.addEventListener('pointermove', (e) => { const r = sec.getBoundingClientRect(); tx = e.clientX - r.left; ty = e.clientY - r.top; pointer = true; }, { passive: true });
-    sec.addEventListener('pointerleave', () => { pointer = false; });
-    tickers.add((t) => {
-      if (!on) return;
-      if (!pointer && !motionPaused) { tx = sec.clientWidth * (0.55 + Math.sin(t * 0.35) * 0.3); ty = clamp(scrollY - secTop + innerHeight * (0.45 + Math.cos(t * 0.27) * 0.2), 200, sec.clientHeight - 200); }
-      x = lerp(x, tx, 0.07); y = lerp(y, ty, 0.07);
-      light.style.transform = `translate3d(${x.toFixed(1)}px,${y.toFixed(1)}px,0)`;
-    });
-  }
-
-  const card = { n: 47, name: '' };
-  function renderClubCount() {
-    const from = Math.min(...club.tiers.map((t) => t.price));
-    $('#clubCount').innerHTML = T(`Klubåret ${club.year} · ${NO} 001–${pad3(club.cap)} · fra ${kr(from)} kr. · 18+`, `Club year ${club.year} · ${NO} 001–${pad3(club.cap)} · from ${kr(from)} kr. · 18+`);
-  }
-  function renderCard(animate) {
-    const n = pad3(card.n), table = card.n <= club.table;
-    const num = $('#mcardNum');
-    if (num.textContent !== n) { num.textContent = n; if (animate && !reduced) { num.classList.remove('is-foil'); void num.offsetWidth; num.classList.add('is-foil'); } }
-    $$('.js-num').forEach((el) => { el.textContent = n; });
-    if (animate && !reduced) { const wb = $('#wbNum'); wb.classList.remove('is-burning'); void wb.offsetWidth; wb.classList.add('is-burning'); }
-    $('#mcardName').textContent = card.name || T('Dit navn', 'Your name');
-    $('#mcardTier').textContent = table ? tierName('bord') : tierName('medlem');
-    $('#mcardYear').textContent = T(`Klubåret ${club.year}`, `Club year ${club.year}`);
-    $('#mcard').classList.toggle('is-table', table);
-    $('#cGoTxt').innerHTML = T(`Fortsæt med ${NO} ${n} ↗`, `Continue with ${NO} ${n} ↗`);
-    const note = $('#cNote');
-    note.classList.toggle('is-table', table);
-    note.innerHTML = table
-      ? T(`${NO} 001–030 er Bryggerens bord – 30 pladser ved bordet.`, `${NO} 001–030 is the Brewer's Table – 30 seats at the table.`)
-      : T(`Vælg mellem ${NO} 001 og ${pad3(club.cap)}. ${NO} 001–030 er Bryggerens bord.`, `Choose from ${NO} 001 to ${pad3(club.cap)}. ${NO} 001–030 is the Brewer's Table.`);
-  }
-
-  function initClubCard() {
-    const num = $('#cNum'), name = $('#cName'), mcard = $('#mcard'), inner = $('.mcard-in', mcard);
-    const commit = (animate) => {
-      const v = parseInt(num.value.replace(/\D/g, ''), 10);
-      if (Number.isFinite(v) && v >= 1 && v <= club.cap) { card.n = v; num.value = pad3(v); renderCard(animate); }
-      else { num.value = pad3(card.n); $('#cNote').innerHTML = T(`Vælg et nummer mellem ${NO} 001 og ${pad3(club.cap)}.`, `Pick a number from ${NO} 001 to ${pad3(club.cap)}.`); }
-    };
-    num.addEventListener('input', () => { num.value = num.value.replace(/\D/g, '').slice(0, 3); });
-    num.addEventListener('change', () => commit(true));
-    num.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); commit(true); } });
-    name.addEventListener('input', () => { card.name = name.value.trim(); $('#mcardName').textContent = card.name || T('Dit navn', 'Your name'); });
-    // one calm roll – never a "random"/game association
-    $('#cSuggest').addEventListener('click', () => {
-      const target = club.table + 1 + Math.floor(Math.random() * (club.cap - club.table));
-      if (reduced || !hasGSAP) { card.n = target; num.value = pad3(target); renderCard(true); return; }
-      const o = { v: card.n };
-      gsap.to(o, { v: target, duration: 0.9, ease: 'power3.out', onUpdate: () => { num.value = pad3(Math.round(o.v)); $('#mcardNum').textContent = pad3(Math.round(o.v)); }, onComplete: () => { card.n = target; renderCard(true); } });
-    });
-    if (fine && !reduced) {
-      const art = $('.numcard-art');
-      art.addEventListener('pointermove', (e) => {
-        const r = mcard.getBoundingClientRect();
-        const x = clamp((e.clientX - r.left) / r.width - 0.5, -0.8, 0.8), y = clamp((e.clientY - r.top) / r.height - 0.5, -0.8, 0.8);
-        inner.style.setProperty('--rx', `${(-y * 14).toFixed(1)}deg`); inner.style.setProperty('--ry', `${(x * 18).toFixed(1)}deg`);
-        inner.style.setProperty('--mx', `${(50 + x * 90).toFixed(0)}%`); inner.style.setProperty('--my', `${(50 + y * 90).toFixed(0)}%`);
-      });
-      art.addEventListener('pointerleave', () => { inner.style.setProperty('--rx', '0deg'); inner.style.setProperty('--ry', '0deg'); });
-    }
-    onVisible($('.numcard-art'), () => renderCard(true), { threshold: 0.5 });
-  }
-
-  function renderTiers() {
-    $('#tierGrid').innerHTML = club.tiers.map((t) => `
-      <li class="tier tier-${t.id}">
-        <span class="tier-tag">${t.id === 'bord' ? L(t.tag).replace(/Nº/g, NO) : L(t.tag)}</span>
-        <span class="tier-name">${L(t.name)}</span>
-        <div class="tier-price"><b>${kr(t.price)}</b> kr.<span>${T(`klubåret ${club.year}`, `club year ${club.year}`)}</span></div>
-        ${t.seats ? `<span class="tier-seats" aria-label="${t.seats} ${T('pladser', 'seats')}">${'<i></i>'.repeat(t.seats)}</span>` : ''}
-        <ul class="tier-lines">${L(t.lines).map((l) => `<li>${l}</li>`).join('')}</ul>
-        <a class="btn btn--ghost" data-club-link="#bliv-medlem" href="${clubHref('#bliv-medlem')}" target="_blank" rel="noopener"><span>${L(t.choose)} ↗</span></a>
-      </li>`).join('');
-  }
-  function renderYear() {
-    $('#yearList').innerHTML = club.evenings.map((e) => `
-      <li class="ev-card">
-        <figure><img src="${e.img}" alt="" loading="lazy" decoding="async"></figure>
-        <span class="ev-month">${MONTHS[lang][e.m - 1]}</span>
-        <h4>${L(e.name)}</h4>
-        <p>${L(e.text)}</p>
-        <div class="ev-for">${e.for.map((id) => `<span>${tierName(id)}</span>`).join('')}</div>
-      </li>`).join('');
-  }
-  renderers.push(renderClubCount, () => renderCard(false), renderTiers, renderYear);
-
-  /* ======================================================================
-     BATCH FILMS – Higgsfield reels with a cinematic photo fallback
+     BATCH FILMS – only when a Higgsfield film is configured
      ====================================================================== */
   const REELS = [
-    { imgs: ['assets/img/bar-pour.avif', 'assets/img/beer.avif', 'assets/img/firefly.avif'], subs: { da: ['Nexø, fredag aften.', 'Fadet er frisk.', 'Ingen KPI. Kun IPA.'], en: ['Nexø, Friday night.', 'The keg is fresh.', 'No KPI. Just IPA.'] } },
-    { imgs: ['assets/img/sign.avif', 'assets/img/sunset-drinks.avif', 'assets/img/chairs.avif'], subs: { da: ['Salt luft.', 'Gyldne timer.', 'Skål, Nexø.'], en: ['Salt air.', 'Golden hours.', 'Cheers, Nexø.'] } },
-    { imgs: ['assets/img/lightstrip.avif', 'assets/club/ev-barrel-672.webp', 'assets/img/no-boring-beer.avif'], subs: { da: ['Lille. Med vilje.', '300 numre i klubåret 2027.', 'Ét af dem kan være dit.'], en: ['Small. On purpose.', '300 numbers in club year 2027.', 'One of them could be yours.'] } }
+    { subs: { da: ['Nexø, fredag aften.', 'Fadet er frisk.', 'Fra hanen.'], en: ['Nexø, Friday night.', 'The keg is fresh.', 'From the tap.'] } },
+    { subs: { da: ['Salt luft.', 'Gyldne timer.', 'Nexø, ved havnen.'], en: ['Salt air.', 'Golden hours.', 'Nexø, on the harbour.'] } },
+    { subs: { da: ['Lille. Med vilje.', '150 numre i 2027.', 'Skriv dig op først.'], en: ['Small. On purpose.', '150 numbers in 2027.', 'Sign up first.'] } }
   ];
   function initFilms() {
+    const films = ((C.videos && C.videos.films) || []).filter((f) => f && f.src);
+    if (!films.length || reduced) return;                  // no footage yet: the section stays hidden
+    const section = $('#films'); section.hidden = false;
     const media = $('#screenMedia'), sub = $('#screenSub'), tc = $('#screenTC'), rec = $('#screenRec'), screen = $('#screen');
-    const tabs = $$('.reel'), films = (C.videos && C.videos.films) || [];
-    const slots = REELS.map((r, i) => {
-      const f = films[i] || {};
-      if (f.src && !reduced) {
-        const v = document.createElement('video');
-        Object.assign(v, { muted: true, playsInline: true, preload: 'none', src: f.src, poster: f.poster || '' });
-        v.setAttribute('playsinline', ''); v.setAttribute('muted', ''); media.appendChild(v);
-        return { video: v, imgs: [] };
-      }
-      return { video: null, imgs: r.imgs.map((src) => { const im = document.createElement('img'); im.alt = ''; im.loading = 'lazy'; im.decoding = 'async'; im.src = src; media.appendChild(im); return im; }) };
+    const all = (C.videos.films || []);
+    const tabs = $$('.reel');
+    const slots = all.map((f) => {
+      if (!f.src) return null;
+      const v = document.createElement('video');
+      Object.assign(v, { muted: true, playsInline: true, preload: 'none', src: f.src, poster: f.poster || '' });
+      v.setAttribute('playsinline', ''); v.setAttribute('muted', ''); media.appendChild(v);
+      return v;
     });
-    let cur = 0, playing = true, inView = false, elapsed = 0, lastSub = -1, lastFrame = -1, typer = 0;
-    const DUR = 9;
-    const typeSub = (text) => {
-      clearInterval(typer);
-      if (reduced) { sub.textContent = text; return; }
-      sub.textContent = ''; let i = 0;
-      typer = setInterval(() => { sub.textContent = text.slice(0, ++i); if (i >= text.length) clearInterval(typer); }, 34);
-    };
+    tabs.forEach((t, i) => { if (!slots[i]) t.hidden = true; });
+    let cur = slots.findIndex(Boolean), playing = true, inView = false, lastSub = -1, typer = 0;
+    const typeSub = (text) => { clearInterval(typer); sub.textContent = ''; let i = 0; typer = setInterval(() => { sub.textContent = text.slice(0, ++i); if (i >= text.length) clearInterval(typer); }, 34); };
     function show(i) {
-      cur = i; elapsed = 0; lastSub = -1; lastFrame = -1;
+      cur = i; lastSub = -1;
       tabs.forEach((t, k) => { t.setAttribute('aria-selected', String(k === i)); $('.bar', t).style.transform = 'scaleX(0)'; });
       rec.textContent = `Batch Film 0${i + 1}`;
-      $$('.is-on', media).forEach((n) => n.classList.remove('is-on'));
-      slots.forEach((s, k) => { if (s.video && k !== i) s.video.pause(); });
-      const s = slots[i];
-      if (s.video) { s.video.currentTime = 0; s.video.classList.add('is-on'); if (inView && playing) s.video.play().catch(() => {}); }
+      slots.forEach((v, k) => { if (!v) return; v.classList.toggle('is-on', k === i); if (k !== i) v.pause(); });
+      slots[i].currentTime = 0; if (inView && playing) slots[i].play().catch(() => {});
     }
     tabs.forEach((t) => t.addEventListener('click', () => { playing = true; show(Number(t.dataset.reel)); }));
-    screen.addEventListener('click', () => {
-      playing = !playing; screen.dataset.cursorLabel = playing ? 'Pause' : 'Play';
-      const s = slots[cur]; if (s.video) playing ? s.video.play().catch(() => {}) : s.video.pause();
-    });
-    whileVisible(screen, (on) => { inView = on; const s = slots[cur]; if (s.video) on && playing ? s.video.play().catch(() => {}) : s.video.pause(); });
-    show(0);
-    renderers.push(() => { lastSub = -1; });
-    tickers.add((t, dt) => {
+    screen.addEventListener('click', () => { playing = !playing; screen.dataset.cursorLabel = playing ? 'Pause' : 'Play'; playing ? slots[cur].play().catch(() => {}) : slots[cur].pause(); });
+    whileVisible(screen, (on) => { inView = on; on && playing ? slots[cur].play().catch(() => {}) : slots[cur].pause(); });
+    show(cur);
+    tickers.add(() => {
       if (!inView) return;
-      const s = slots[cur];
-      const dur = s.video && s.video.duration ? s.video.duration : DUR;
-      if (playing && !motionPaused) elapsed += dt;
-      if (s.video && s.video.duration) elapsed = s.video.currentTime;
-      const p = clamp(elapsed / dur, 0, 1);
+      const v = slots[cur]; if (!v.duration) return;
+      const p = clamp(v.currentTime / v.duration, 0, 1);
       $('.bar', tabs[cur]).style.transform = `scaleX(${p.toFixed(4)})`;
       const k = Math.min(2, Math.floor(p * 3));
-      if (!s.video && k !== lastFrame) { s.imgs.forEach((im, j) => im.classList.toggle('is-on', j === k)); lastFrame = k; }
       if (k !== lastSub) { lastSub = k; typeSub((REELS[cur].subs[lang] || REELS[cur].subs.da)[k]); }
-      tc.textContent = `00:00:${String(Math.floor(elapsed)).padStart(2, '0')}:${String(Math.floor((elapsed % 1) * 24)).padStart(2, '0')}`;
-      if (p >= 1 && playing && !motionPaused) show((cur + 1) % slots.length);
+      tc.textContent = `00:00:${String(Math.floor(v.currentTime)).padStart(2, '0')}:${String(Math.floor((v.currentTime % 1) * 24)).padStart(2, '0')}`;
+      if (v.ended || p >= 0.999) { let n = cur; do { n = (n + 1) % slots.length; } while (!slots[n]); show(n); }
     });
   }
 
   /* ======================================================================
-     EVENTS
+     05 CALENDAR (inside Find os) · MAP · FOOTER · REVEALS
      ====================================================================== */
   function renderEvents() {
     const now = Date.now();
     const evs = (C.events || []).map((e) => ({ ...e, t: e.date ? new Date(e.date).getTime() : null }));
-    const upcoming = evs.filter((e) => e.t && e.t >= now).sort((a, b) => a.t - b.t);
-    const tba = evs.filter((e) => !e.t), past = evs.filter((e) => e.t && e.t < now).sort((a, b) => b.t - a.t);
-    const fmt = (t) => { const d = new Date(t); return { dm: `${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth() + 1).padStart(2, '0')}`, sub: new Intl.DateTimeFormat(lang === 'en' ? 'en-GB' : 'da-DK', { weekday: 'long', year: 'numeric', timeZone: 'Europe/Copenhagen' }).format(d) }; };
-    const arrow = '<svg viewBox="0 0 20 20"><path d="M4 16 16 4M7 4h9v9"/></svg>';
-    $('#evList').innerHTML = [...upcoming, ...tba, ...past].map((e) => {
+    const upcoming = evs.filter((e) => !e.t || e.t >= now).sort((a, b) => (a.t || 0) - (b.t || 0));
+    const past = evs.filter((e) => e.t && e.t < now).sort((a, b) => b.t - a.t);
+    const fmt = (t) => new Intl.DateTimeFormat(lang === 'en' ? 'en-GB' : 'da-DK', { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'Europe/Copenhagen' }).format(new Date(t));
+    $('#evList').innerHTML = [...upcoming, ...past].map((e) => {
       const isPast = e.t && e.t < now;
-      const d = e.t ? fmt(e.t) : { dm: e.label ? L(e.label) : T('Snart', 'Soon'), sub: e.club ? T('Kun for medlemmer', 'Members only') : T('Følg med', 'Stay tuned') };
       const ext = /^https?:/.test(e.url || '');
-      const tags = [...(e.tags || []), ...(isPast ? [T('Afholdt', 'Past')] : [])];
-      return `<a class="ev${isPast ? ' is-past' : ''}${e.club ? ' is-club' : ''}" href="${e.url || '#events'}" ${ext ? 'target="_blank" rel="noopener"' : ''}>
-        <div class="ev-date">${d.dm}<small>${d.sub}</small></div>
-        <div class="ev-body"><h3>${L(e.title)}</h3><p>${L(e.text)}</p><div class="ev-tags">${tags.map((x) => `<span>${x}</span>`).join('')}</div></div>
-        <span class="ev-cta" aria-hidden="true">${arrow}</span>
-        ${e.img ? `<span class="ev-img" aria-hidden="true"><img src="${e.img}" alt="" loading="lazy"></span>` : ''}
-      </a>`;
+      return `<li class="ev${isPast ? ' is-past' : ''}"><a href="${e.url || '#visit'}" ${ext ? 'target="_blank" rel="noopener"' : ''}>
+        <span class="ev-d">${e.t ? fmt(e.t) : L(e.label)}</span>
+        <span><span class="ev-t">${L(e.title)}${isPast ? ` <span class="sr-only">(${T('afholdt', 'past')})</span>` : ''}</span><span class="ev-x">${L(e.text)}</span></span>
+        <span class="ev-arrow" aria-hidden="true">${ext ? '↗' : '↑'}</span>
+      </a></li>`;
     }).join('');
   }
   renderers.push(renderEvents);
 
-  /* ======================================================================
-     MAP · FOOTER · REVEALS · EGGS
-     ====================================================================== */
   function initMap() {
     let html = '';
     for (let x = -60; x <= 660; x += 60) html += `<line x1="${x}" y1="-30" x2="${x}" y2="705"/>`;
@@ -877,7 +868,7 @@
       if (reduced || h > innerHeight + 2) { footer.classList.add('is-static'); space.style.height = '0px'; } else space.style.height = h + 'px';
     };
     fit(); addEventListener('resize', fit);
-    if (hasGSAP && !reduced) gsap.fromTo('.footer-logo', { yPercent: 30, scale: 0.92 }, { yPercent: 0, scale: 1, ease: 'none', scrollTrigger: { trigger: space, start: 'top bottom', end: 'bottom bottom', scrub: true } });
+    if (hasGSAP && !reduced) gsap.fromTo('.footer-logo-wrap', { yPercent: 30, scale: 0.92 }, { yPercent: 0, scale: 1, ease: 'none', scrollTrigger: { trigger: space, start: 'top bottom', end: 'bottom bottom', scrub: true } });
   }
 
   function initReveals() {
@@ -889,6 +880,9 @@
     });
     $$('[data-scramble]').forEach((el) => onVisible(el, () => scramble(el, el.textContent, 0.8), { threshold: 1 }));
     gsap.from('.club-title > span', { yPercent: 40, opacity: 0, duration: 1.3, ease: 'expo.out', stagger: 0.12, scrollTrigger: { trigger: '.club-title', start: 'top 85%' } });
+    gsap.from('.kit-stage .mcard', { yPercent: 18, rotate: -16, opacity: 0, duration: 1.4, ease: 'expo.out', scrollTrigger: { trigger: '.kit-stage', start: 'top 75%' } });
+    gsap.from('.kit-ledge > *', { y: 40, opacity: 0, duration: 1.2, ease: 'expo.out', stagger: 0.1, scrollTrigger: { trigger: '.kit-stage', start: 'top 75%' } });
+    gsap.from('.rung', { y: 24, opacity: 0, duration: 1, ease: 'expo.out', stagger: 0.08, scrollTrigger: { trigger: '#ladder', start: 'top 85%' } });
   }
 
   function initEggs() {
@@ -896,31 +890,36 @@
     addEventListener('keydown', (e) => {
       if (e.target.closest('input, textarea')) return;
       buf = (buf + e.key.toLowerCase()).slice(-6);
-      if (buf.endsWith('ipa')) { burst(innerWidth / 2, innerHeight * 0.7, 80); toast(T('Ingen kedelig øl. Aldrig.', 'No boring beer. Ever.')); buf = ''; }
-      if (buf.endsWith('kpi')) { toast(T('KPI? Ikke her, kammerat.', 'KPI? Not here, mate.')); buf = ''; }
+      if (buf.endsWith('ipa')) { burst(innerWidth / 2, innerHeight * 0.7, 80); toast(T('Ingen kedelig øl.', 'No boring beer.')); buf = ''; }
     });
   }
 
   /* ======================================================================
-     DOOR – liquid-fill loader + age gate
+     DOOR – liquid-fill loader + 18+ gate (returning visitors: almost instant)
      ====================================================================== */
   function initDoor(hero) {
     const door = $('#door'), pct = $('#doorPct'), gate = $('#doorGate'), liquid = $('#doorLiquid'), wave = $('#doorWave'), foam = $('#doorFoam');
     const main = $('#main'), header = $('#header');
+    const deepLink = location.hash && location.hash.length > 1 && document.querySelector(location.hash) ? location.hash : '';
+    const finish = () => {
+      door.remove(); if (lenis) lenis.start(); if (hasGSAP) ScrollTrigger.refresh();
+      if (deepLink) requestAnimationFrame(() => scrollToTarget(deepLink, true));
+    };
+    if (still) { door.remove(); main.inert = false; header.inert = false; document.body.classList.remove('is-locked'); hero.intro(); return; }
     const verified = store.get('sb-18') === '1';
     const clip = $('#doorClip');
     logoDs.forEach((d) => { const p = document.createElementNS('http://www.w3.org/2000/svg', 'path'); p.setAttribute('d', d); clip.appendChild(p); });
     main.inert = true; header.inert = true;
     if (lenis) lenis.stop();
     const heroImg = $('.hero-fallback');
-    const tasks = [document.fonts ? document.fonts.ready : Promise.resolve(), heroImg.decode ? heroImg.decode().catch(() => {}) : Promise.resolve(), new Promise((r) => setTimeout(r, reduced ? 200 : verified ? 900 : 1500))];
+    const tasks = [document.fonts ? document.fonts.ready : Promise.resolve(), heroImg.decode ? heroImg.decode().catch(() => {}) : Promise.resolve(), new Promise((r) => setTimeout(r, reduced ? 150 : verified ? 450 : 1000))];
     let done = 0, target = 0, shown = 0, finished = false, gateShown = false, prev = performance.now();
     tasks.forEach((p) => p.then(() => { done++; target = (done / tasks.length) * 100; }));
-    setTimeout(() => { done = tasks.length; target = 100; }, 4000);
+    setTimeout(() => { done = tasks.length; target = 100; }, 3500);
     const doorTick = (t) => {
       if (finished) return;
       const now = performance.now(), dt = Math.min(1, (now - prev) / 1000); prev = now;
-      shown = Math.min(100, shown + Math.max(0, target - shown) * (1 - Math.exp(-dt * 5)) + (shown < target ? dt * 18 : 0));
+      shown = Math.min(100, shown + Math.max(0, target - shown) * (1 - Math.exp(-dt * 6)) + (shown < target ? dt * 30 : 0));
       if (target < 100) shown = Math.min(shown, 96);
       pct.textContent = String(Math.round(shown)).padStart(3, '0');
       liquid.setAttribute('transform', `translate(0 ${(LOGO_H + 20 - (shown / 100) * (LOGO_H + 60)).toFixed(1)})`);
@@ -934,9 +933,9 @@
       else { gate.style.opacity = 1; gate.style.visibility = 'visible'; }
       setTimeout(() => $('#doorYes').focus({ preventScroll: true }), 300);
     }
-    $('#doorYes').addEventListener('click', (e) => { store.set('sb-18', '1'); burst(e.clientX || innerWidth / 2, e.clientY || innerHeight / 2, 50); enter(); });
+    $('#doorYes').addEventListener('click', () => { store.set('sb-18', '1'); enter(); });
     $('#doorNo').addEventListener('click', () => {
-      $('#doorNote').textContent = T('Kom tilbage, når du er fyldt 18.', 'Come back when you are 18.');
+      $('#doorNote').textContent = T('Siden er for voksne over 18.', 'This site is for adults over 18.');
       if (hasGSAP) gsap.fromTo('.door-actions', { x: -10 }, { x: 0, duration: 0.6, ease: 'elastic.out(1, 0.3)' });
     });
     function enter() {
@@ -944,10 +943,8 @@
       finished = true; tickers.delete(doorTick);
       main.inert = false; header.inert = false;
       document.body.classList.remove('is-locked');
-      const finish = () => { door.remove(); if (lenis) lenis.start(); if (hasGSAP) ScrollTrigger.refresh(); };
       if (!reduced) {
-        // CSS transitions run on the compositor: the door opens on time even in a throttled tab
-        door.classList.add('is-leaving');
+        door.classList.add('is-leaving');           // CSS transition: on time even in a throttled tab
         setTimeout(() => hero.intro(), 550);
         setTimeout(finish, 1450);
       } else { door.style.display = 'none'; finish(); hero.intro(); }
@@ -976,13 +973,15 @@
   initCursor();
   initNav();
   initPint();
+  initJoinBar();
   initMotionToggle();
-  const glOn = initHeroGL();
-  const hero = initHeroMask(glOn);
+  initHeroGL();
+  const hero = initHeroMask();
   initMarquees();
   initTapGlass();
   initHarbour();
   initClubLight();
+  initTally();
   initClubCard();
   initFilms();
   initMap();
