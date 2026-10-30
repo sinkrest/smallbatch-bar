@@ -14,7 +14,7 @@ window.SB_CONFIG = {
        · guest tickets 0 / 1 / 2 – only for Første tap and Klubaftenen
        · pre-sale = the founders' list; numbers go in sign-up order
      ---------------------------------------------------------------------- */
-  joinUrl: "https://small-batch-koncept.vercel.app/klubben/stifterlisten/",   // ?fra=<placement> is added per button
+  joinUrl: "https://small-batch-koncept.vercel.app/klubben/",   // ?fra=<placement> is added per button. Not the founders' list until it is approved and stores for real (2026-10-31)
   clubUrl: {
     da: "https://small-batch-koncept.vercel.app/klubben/",
     en: "https://small-batch-koncept.vercel.app/en/club/"
