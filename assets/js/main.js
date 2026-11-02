@@ -963,7 +963,7 @@
   function initScroll() {
     if (!hasGSAP) return;
     if (!reduced && fine && window.Lenis) {
-      lenis = new Lenis({ lerp: 0.14, smoothWheel: true, wheelMultiplier: 1 });
+      lenis = new Lenis({ lerp: 0.14, smoothWheel: true, wheelMultiplier: 1, prevent: (node) => !!(node.closest && node.closest('dialog')) });   // a panel scrolls itself, not the page behind it
       lenis.on('scroll', ScrollTrigger.update);
       gsap.ticker.add((time) => lenis.raf(time * 1000));
       gsap.ticker.lagSmoothing(0);

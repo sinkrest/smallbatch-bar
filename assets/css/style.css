@@ -99,6 +99,11 @@ input, textarea { font: inherit; color: inherit; }
 .has-cursor .cursor { display: block; }
 .has-cursor, .has-cursor a, .has-cursor button, .has-cursor [data-cursor-label] { cursor: none; }
 .has-cursor input { cursor: text; }
+/* a modal dialog (the overview on /baren/) sits in the browser's top layer, above any
+   z-index, so the custom cursor can't reach it: give the system pointer back while it's open */
+.has-cursor:has(dialog[open]) .cursor { display: none; }
+.has-cursor:has(dialog[open]), .has-cursor:has(dialog[open]) dialog { cursor: auto; }
+.has-cursor:has(dialog[open]) dialog a, .has-cursor:has(dialog[open]) dialog button { cursor: pointer; }
 .cursor-dot, .cursor-ring { position: absolute; top: 0; left: 0; will-change: transform; }
 .cursor-dot { width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; background: var(--blaze); }
 .cursor-ring { width: 44px; height: 44px; margin: -22px 0 0 -22px; border-radius: 50%; border: 1px solid rgba(240, 237, 231, .5); display: grid; place-items: center; transition: width .45s var(--ease), height .45s var(--ease), margin .45s var(--ease), background .35s, border-color .35s; }
