@@ -185,7 +185,7 @@ input, textarea { font: inherit; color: inherit; }
    ========================================================================== */
 .hero { position: relative; height: 100vh; height: 100svh; min-height: 560px; overflow: hidden; background: var(--ink); }
 .hero-fallback, .hero-gl, .hero-mask { position: absolute; inset: 0; width: 100%; height: 100%; }
-.hero-fallback { object-fit: cover; filter: hue-rotate(14deg) saturate(1.05) brightness(1.3); }
+.hero-fallback { object-fit: cover; }
 .hero-mask { pointer-events: none; }
 .hero-mask .veil { fill: var(--ink); }
 .hero-gl { opacity: 0; transition: opacity 1s; }
