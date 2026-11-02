@@ -336,10 +336,14 @@
         col.r=texture2D(uTex,tuv+vec2(ca,0.)).r;
         col.g=texture2D(uTex,tuv).g;
         col.b=texture2D(uTex,tuv-vec2(ca,0.)).b;
+        float l=dot(col,vec3(.299,.587,.114));
+        vec3 amber=mix(vec3(.46,.23,.03),vec3(1.,.67,.14),smoothstep(.03,.36,l));
+        amber=mix(amber,vec3(1.,.86,.44),smoothstep(.36,.8,l));
+        col=mix(col,amber,.9);
         col+=(b1.z*.55+b2.z*.35)*vec3(1.,.86,.62);
         col+=(b1.w+b2.w*.7)*.9;
         col*=vec3(1.05,.98,.9);
-        col+=vec3(1.,.42,.08)*exp(-dist*3.5)*.12;
+        col+=vec3(1.,.6,.15)*exp(-dist*3.5)*.12;
         float v=smoothstep(1.3,.2,length((vUv-.5)*vec2(asp.x*.75,1.)));
         col*=mix(.4,1.,v);
         col*=uFade;
@@ -351,7 +355,7 @@
         float aa=.9/uLogo.z;
         float inL=smoothstep(-aa,aa,sd);
         float glow=exp(-max(-sd,0.)*uLogo.z/10.)*smoothstep(${(SDF.range * 0.9).toFixed(1)},0.,-sd)*(1.-inL);
-        vec3 veil=vec3(.067,.055,.043)+vec3(1.,.42,.1)*glow*.16*uGlow;
+        vec3 veil=vec3(.067,.055,.043)+vec3(1.,.6,.16)*glow*.28*uGlow;
         col=mix(col,veil,(1.-inL)*uVeil);
         gl_FragColor=vec4(col,1.);
       }`;
