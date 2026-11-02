@@ -644,7 +644,7 @@
   }
 
   function initClubCard() {
-    const num = $('#cNum'), name = $('#cName'), cards = $$('.kit-stage .mcard-in');
+    const num = $('#cNum'), name = $('#cName');
     const commit = (animate) => {
       const v = parseInt(num.value.replace(/\D/g, ''), 10);
       if (Number.isFinite(v) && v >= 1 && v <= club.founders) { card.n = v; num.value = pad3(v); renderCard(animate); }
@@ -662,14 +662,16 @@
       gsap.to(o, { v: target, duration: 0.9, ease: 'power3.out', onUpdate: () => { num.value = pad3(Math.round(o.v)); $('#mcardNum').textContent = pad3(Math.round(o.v)); }, onComplete: () => { card.n = target; renderCard(true); } });
     });
     if (fine && !reduced) {
-      const stage = $('.kit-stage');
       const set = (c, k, v) => c.style.setProperty(k, v);
-      stage.addEventListener('pointermove', (e) => {
-        const r = stage.getBoundingClientRect();
-        const x = clamp((e.clientX - r.left) / r.width - 0.5, -0.8, 0.8), y = clamp((e.clientY - r.top) / r.height - 0.5, -0.8, 0.8);
-        cards.forEach((c) => { set(c, '--rx', `${(3 - y * 12).toFixed(1)}deg`); set(c, '--ry', `${(-5 + x * 16).toFixed(1)}deg`); set(c, '--mx', `${(50 + x * 90).toFixed(0)}%`); set(c, '--my', `${(50 + y * 90).toFixed(0)}%`); });
+      $$('.kit-stage .mcard').forEach((c) => {
+        const inner = $('.mcard-in', c);
+        c.addEventListener('pointermove', (e) => {
+          const r = c.getBoundingClientRect();
+          const x = (e.clientX - r.left) / r.width - 0.5, y = (e.clientY - r.top) / r.height - 0.5;
+          set(inner, '--rx', `${(3 - y * 14).toFixed(1)}deg`); set(inner, '--ry', `${(-5 + x * 18).toFixed(1)}deg`); set(inner, '--mx', `${(50 + x * 90).toFixed(0)}%`); set(inner, '--my', `${(50 + y * 90).toFixed(0)}%`);
+        });
+        c.addEventListener('pointerleave', () => { inner.style.removeProperty('--rx'); inner.style.removeProperty('--ry'); });
       });
-      stage.addEventListener('pointerleave', () => cards.forEach((c) => { c.style.removeProperty('--rx'); c.style.removeProperty('--ry'); }));
     }
     onVisible($('.kit-stage'), () => renderCard(true), { threshold: 0.5 });
   }

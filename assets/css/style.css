@@ -339,14 +339,14 @@ input, textarea { font: inherit; color: inherit; }
 .mcard-in { position: relative; display: block; width: 100%; height: 100%; text-align: left; border-radius: 3.72% / 5.9%; color: var(--metal); overflow: hidden; transform: rotateX(var(--rx)) rotateY(var(--ry)); transition: transform .5s var(--ease); background: linear-gradient(135deg, #2a2a2f, #131315 45%, #1f1f24 62%, #0d0d0f); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .13), 0 30px 60px -24px rgba(0, 0, 0, .9), 0 2px 3px rgba(0, 0, 0, .6); container-type: inline-size; }
 .mcard-in::before { content: ""; position: absolute; inset: 0; background: repeating-linear-gradient(180deg, rgba(255, 255, 255, .022) 0 1px, transparent 1px 3px); pointer-events: none; }
 .mcard-in::after { content: ""; position: absolute; inset: -20%; pointer-events: none; background: radial-gradient(38% 30% at var(--mx, 30%) var(--my, 20%), rgba(255, 255, 255, .2), transparent 70%); opacity: 0; transition: opacity .5s; }
-.kit-stage:hover .mcard-in::after { opacity: 1; }
+.kit-stage .mcard:hover .mcard-in::after { opacity: 1; }
 .mcard-rings { position: absolute; inset: 0; background: url("../club/card-rings.svg") no-repeat center / 100% 100%; }
 .mcard-wm { position: absolute; left: 7cqw; top: 7.24cqw; width: 29.2cqw; aspect-ratio: 1010 / 665; background: var(--metal); -webkit-mask: url("../club/card-wm-stack.svg") no-repeat left top / contain; mask: url("../club/card-wm-stack.svg") no-repeat left top / contain; }
 .mcard-club { position: absolute; left: 7cqw; top: 28.9cqw; font: 500 3.9cqw/1 var(--sans); letter-spacing: .28em; text-transform: uppercase; color: var(--metal); white-space: nowrap; }
 .mcard-no { position: absolute; right: 6.07cqw; bottom: 6.54cqw; display: flex; align-items: flex-start; gap: .8cqw; line-height: 1; }
 .mcard-no small { font: 700 7.6cqw/.7 var(--slab); color: var(--metal); }
 .mcard-no b { display: block; font: 700 31cqw/.7 var(--slab); letter-spacing: 0; background: linear-gradient(100deg, #bfbab1 0, #e4dfd6 30%, #fff 45%, #e4dfd6 60%, #bfbab1 100%); background-size: 250% 100%; background-position: 100% 0; -webkit-background-clip: text; background-clip: text; color: transparent; transition: background-position 1s ease-out; }
-.kit-stage:hover .mcard-no b { background-position: 0 0; }
+.kit-stage .mcard:hover .mcard-no b { background-position: 0 0; }
 .mcard-no b.is-foil { animation: foil 1.1s ease-out both; }
 @keyframes foil { from { background-position: 100% 0; } to { background-position: 0 0; } }
 .mcard-name { position: absolute; left: 7cqw; bottom: 6.3cqw; width: 31cqw; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; overflow-wrap: anywhere; padding-top: 2.9cqw; font: 500 4.6cqw/1.2 var(--sans); letter-spacing: .2em; text-transform: uppercase; color: var(--metal); background: linear-gradient(var(--metal), var(--metal)) no-repeat left top / 8.2cqw .55cqw; }
