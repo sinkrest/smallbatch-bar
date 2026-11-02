@@ -94,7 +94,8 @@ input, textarea { font: inherit; color: inherit; }
 .grain { pointer-events: none; position: fixed; inset: 0; z-index: 900; background: url("../club/grain.png") repeat; opacity: .045; }
 
 /* ---------- cursor ---------- */
-.cursor { position: fixed; top: 0; left: 0; z-index: 950; pointer-events: none; display: none; }
+/* above everything, including the door (990): the system pointer is hidden while this shows */
+.cursor { position: fixed; top: 0; left: 0; z-index: 995; pointer-events: none; display: none; }
 .has-cursor .cursor { display: block; }
 .has-cursor, .has-cursor a, .has-cursor button, .has-cursor [data-cursor-label] { cursor: none; }
 .has-cursor input { cursor: text; }

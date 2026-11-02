@@ -153,10 +153,15 @@
      ====================================================================== */
   function initCursor() {
     if (!fine || reduced) return;
-    document.documentElement.classList.add('has-cursor');
     const cur = $('#cursor'), ring = $('.cursor-ring', cur), dot = $('.cursor-dot', cur), label = $('span', ring);
-    let mx = innerWidth / 2, my = innerHeight / 2, rx = mx, ry = my, moving = false;
-    addEventListener('pointermove', (e) => { mx = e.clientX; my = e.clientY; dot.style.transform = `translate3d(${mx}px,${my}px,0)`; moving = true; }, { passive: true });
+    let mx = 0, my = 0, rx = 0, ry = 0, moving = false, shown = false;
+    addEventListener('pointermove', (e) => {
+      if (e.pointerType === 'touch') return;
+      mx = e.clientX; my = e.clientY;
+      // the system pointer only hides once the custom one is on screen, at the same spot
+      if (!shown) { shown = true; rx = mx; ry = my; ring.style.transform = `translate3d(${rx}px,${ry}px,0)`; document.documentElement.classList.add('has-cursor'); }
+      dot.style.transform = `translate3d(${mx}px,${my}px,0)`; moving = true;
+    }, { passive: true });
     document.addEventListener('pointerover', (e) => {
       const lab = e.target.closest('[data-cursor-label]');
       const hov = e.target.closest('a, button, [role="button"], label, #tapBoard .tap');
