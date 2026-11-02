@@ -77,10 +77,10 @@
     if (!initial && hasGSAP) requestAnimationFrame(() => ScrollTrigger.refresh());
   }
 
-  /* every way into the club: the founders' list (with its own ?fra= per
-     placement, so the club can see which button works) or the full club page */
-  function joinHref(placement) { return (C.joinUrl || '#club') + '?fra=' + encodeURIComponent(placement || 'hjemmeside'); }
+  /* every way into the club, each with its own ?fra= placement: the club page's
+     number picker – or, once it opens, the founders' list (config.joinUrl) */
   function clubHref(anchor = '') { const u = C.clubUrl || {}; return (u[lang] || u.da || '#club') + (anchor || ''); }
+  function joinHref(placement) { const q = '?fra=' + encodeURIComponent(placement || 'hjemmeside'); return C.joinUrl ? C.joinUrl + q : clubHref() + q + '#nummer'; }
   renderers.push(() => {
     $$('[data-join]').forEach((a) => { a.href = joinHref(a.dataset.join); });
     $$('[data-club-link]').forEach((a) => { a.href = clubHref(a.dataset.clubLink); });
@@ -629,19 +629,17 @@
     $$('.js-num').forEach((el) => { el.textContent = n; });
     $$('.js-num-svg').forEach((el) => { el.textContent = n; });
     if (animate && !reduced) { const wb = $('#wbNum'); wb.classList.remove('is-burning'); void wb.offsetWidth; wb.classList.add('is-burning'); }
+    if (animate && !reduced) $$('.kit-stage .mcard').forEach((c) => { c.classList.remove('is-glint'); void c.offsetWidth; c.classList.add('is-glint'); });
     $('#mcardName').textContent = card.name || T('Dit navn', 'Your name');
-    $('#mcardTier').textContent = table ? tierName('bord') : tierName('medlem');
-    $('#mcardYear').textContent = T(`Klubåret ${club.year}`, `Club year ${club.year}`);
-    $('#mcard').classList.toggle('is-table', table);
     const note = $('#cNote');
     note.classList.toggle('is-table', table);
     note.innerHTML = table
-      ? T(`${NO} ${n} er en plads ved Bryggerens bord. Skriv det som dit ønske på stifterlisten – numrene går i den rækkefølge, I skriver jer op.`, `${NO} ${n} is a seat at the Brewer's Table. Put it down as your wish on the founders' list – numbers go in sign-up order.`)
-      : T(`Skriv ${NO} ${n} som dit ønske på stifterlisten. I ${club.year} åbner ${NO} 001–${pad3(club.founders)}, og numrene går i den rækkefølge, I skriver jer op.`, `Put ${NO} ${n} down as your wish on the founders' list. In ${club.year} ${NO} 001–${pad3(club.founders)} open, and numbers go in sign-up order.`);
+      ? T(`${NO} ${n} er en plads ved Bryggerens bord – ${NO} 001–${pad3(club.table)}, ${club.table} pladser.`, `${NO} ${n} is a seat at the Brewer's Table – ${NO} 001–${pad3(club.table)}, ${club.table} seats.`)
+      : T(`I ${club.year} åbner ${NO} 001–${pad3(club.founders)}. ${NO} 001–${pad3(club.table)} er Bryggerens bord.`, `In ${club.year} ${NO} 001–${pad3(club.founders)} open. ${NO} 001–${pad3(club.table)} is the Brewer's Table.`);
   }
 
   function initClubCard() {
-    const num = $('#cNum'), name = $('#cName'), inner = $('#mcard .mcard-in');
+    const num = $('#cNum'), name = $('#cName'), cards = $$('.kit-stage .mcard-in');
     const commit = (animate) => {
       const v = parseInt(num.value.replace(/\D/g, ''), 10);
       if (Number.isFinite(v) && v >= 1 && v <= club.founders) { card.n = v; num.value = pad3(v); renderCard(animate); }
@@ -660,14 +658,13 @@
     });
     if (fine && !reduced) {
       const stage = $('.kit-stage');
-      const rest = () => { inner.style.setProperty('--rx', '6deg'); inner.style.setProperty('--ry', '-12deg'); };
-      $('#kit').addEventListener('pointermove', (e) => {
+      const set = (c, k, v) => c.style.setProperty(k, v);
+      stage.addEventListener('pointermove', (e) => {
         const r = stage.getBoundingClientRect();
         const x = clamp((e.clientX - r.left) / r.width - 0.5, -0.8, 0.8), y = clamp((e.clientY - r.top) / r.height - 0.5, -0.8, 0.8);
-        inner.style.setProperty('--rx', `${(6 - y * 14).toFixed(1)}deg`); inner.style.setProperty('--ry', `${(-12 + x * 18).toFixed(1)}deg`);
-        inner.style.setProperty('--mx', `${(50 + x * 90).toFixed(0)}%`); inner.style.setProperty('--my', `${(50 + y * 90).toFixed(0)}%`);
+        cards.forEach((c) => { set(c, '--rx', `${(3 - y * 12).toFixed(1)}deg`); set(c, '--ry', `${(-5 + x * 16).toFixed(1)}deg`); set(c, '--mx', `${(50 + x * 90).toFixed(0)}%`); set(c, '--my', `${(50 + y * 90).toFixed(0)}%`); });
       });
-      $('#kit').addEventListener('pointerleave', rest);
+      stage.addEventListener('pointerleave', () => cards.forEach((c) => { c.style.removeProperty('--rx'); c.style.removeProperty('--ry'); }));
     }
     onVisible($('.kit-stage'), () => renderCard(true), { threshold: 0.5 });
   }
@@ -687,7 +684,11 @@
     $('#yearline').innerHTML = club.evenings.map((e) => `
       <li><span class="m">${MON[lang][e.m - 1]} ${club.year}</span><b>${L(e.name)}</b><span class="who">${who(e.for)}</span></li>`).join('');
   }
-  renderers.push(() => renderCard(false), renderLadder, renderYear);
+  function renderCount() {
+    const from = Math.min(...club.tiers.map((t) => t.price));
+    $('#clubCount').innerHTML = T(`Klubåret ${club.year} · ${NO} 001–${pad3(club.founders)} · fra ${kr(from)} kr. · 18+`, `Club year ${club.year} · ${NO} 001–${pad3(club.founders)} · from ${kr(from)} kr. · 18+`);
+  }
+  renderers.push(() => renderCard(false), renderLadder, renderYear, renderCount);
 
   /* ======================================================================
      03 TAP BOARD – % vol. shown neutrally, light to dark
@@ -783,7 +784,7 @@
   const REELS = [
     { subs: { da: ['Nexø, fredag aften.', 'Fadet er frisk.', 'Fra hanen.'], en: ['Nexø, Friday night.', 'The keg is fresh.', 'From the tap.'] } },
     { subs: { da: ['Salt luft.', 'Gyldne timer.', 'Nexø, ved havnen.'], en: ['Salt air.', 'Golden hours.', 'Nexø, on the harbour.'] } },
-    { subs: { da: ['Lille. Med vilje.', '150 numre i 2027.', 'Skriv dig op først.'], en: ['Small. On purpose.', '150 numbers in 2027.', 'Sign up first.'] } }
+    { subs: { da: ['Lille. Med vilje.', '150 numre i 2027.', 'Vælg dit nummer.'], en: ['Small. On purpose.', '150 numbers in 2027.', 'Pick your number.'] } }
   ];
   function initFilms() {
     const films = ((C.videos && C.videos.films) || []).filter((f) => f && f.src);
@@ -880,7 +881,7 @@
     });
     $$('[data-scramble]').forEach((el) => onVisible(el, () => scramble(el, el.textContent, 0.8), { threshold: 1 }));
     gsap.from('.club-title > span', { yPercent: 40, opacity: 0, duration: 1.3, ease: 'expo.out', stagger: 0.12, scrollTrigger: { trigger: '.club-title', start: 'top 85%' } });
-    gsap.from('.kit-stage .mcard', { yPercent: 18, rotate: -16, opacity: 0, duration: 1.4, ease: 'expo.out', scrollTrigger: { trigger: '.kit-stage', start: 'top 75%' } });
+    gsap.from('.kit-stage .mcard', { y: 60, opacity: 0, duration: 1.4, ease: 'expo.out', stagger: -0.12, scrollTrigger: { trigger: '.kit-stage', start: 'top 75%' } });
     gsap.from('.kit-ledge > *', { y: 40, opacity: 0, duration: 1.2, ease: 'expo.out', stagger: 0.1, scrollTrigger: { trigger: '.kit-stage', start: 'top 75%' } });
     gsap.from('.rung', { y: 24, opacity: 0, duration: 1, ease: 'expo.out', stagger: 0.08, scrollTrigger: { trigger: '#ladder', start: 'top 85%' } });
   }

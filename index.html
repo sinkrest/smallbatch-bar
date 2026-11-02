@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
 <title>Koncept · Small Batch Nexø – Experimental Brewery & Bar · Nexø Havn, Bornholm</title>
-<meta name="description" content="Small Batch – eksperimenterende bryggeri og bar på Nexø Havn, Bornholm. Ingen kedelig øl. Small Batch Club: 150 numre i 2027, hvert brændt ind i en træflaske drejet på Bornholm. Skriv dig på stifterlisten.">
+<meta name="description" content="Small Batch – eksperimenterende bryggeri og bar på Nexø Havn, Bornholm. Ingen kedelig øl. Small Batch Club: 150 numre i klubåret 2027, hvert brændt ind i en træflaske drejet på Bornholm og graveret i et kort af sort aluminium.">
 <meta name="theme-color" content="#110e0b">
 <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
 <link rel="canonical" href="https://www.smallbatch.bar/">
@@ -18,7 +18,7 @@
 <link rel="preload" as="font" type="font/woff2" href="assets/fonts/instrument-sans.woff2" crossorigin>
 <link rel="preload" as="font" type="font/woff2" href="assets/fonts/rokkitt.woff2" crossorigin>
 <link rel="preload" as="image" href="assets/img/firefly.avif" type="image/avif">
-<link rel="stylesheet" href="assets/css/style.css?v=202610252227">
+<link rel="stylesheet" href="assets/css/style.css?v=202611022106">
 <script>document.documentElement.classList.add('js');if(matchMedia('(prefers-reduced-motion: reduce)').matches)document.documentElement.classList.add('reduced');</script>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"BarOrPub","name":"Small Batch Nexø","alternateName":"Small Batch Experimental Brewery","url":"https://www.smallbatch.bar/","slogan":"Mindre KPI – Mere IPA","address":{"@type":"PostalAddress","streetAddress":"Nordre Strandvej 6","postalCode":"3730","addressLocality":"Nexø","addressRegion":"Bornholm","addressCountry":"DK"},"geo":{"@type":"GeoCoordinates","latitude":55.065745,"longitude":15.1352743},"sameAs":["https://www.instagram.com/smallbatchnexo","https://www.facebook.com/smallbatchnexo"]}
@@ -82,7 +82,7 @@
       <button type="button" data-lang="da" aria-pressed="true">DA</button>
       <button type="button" data-lang="en" aria-pressed="false">EN</button>
     </div>
-    <a class="btn btn--sm btn--ghost header-join" data-join="bar-header" href="#club" target="_blank" rel="noopener"><span class="btn-dot blaze"></span><span data-en="Founders' list ↗">Skriv dig op ↗</span></a>
+    <a class="btn btn--sm btn--ghost header-join" data-join="bar-header" href="#club" target="_blank" rel="noopener"><span class="btn-dot blaze"></span><span data-en="Join the club ↗">Bliv medlem ↗</span></a>
     <button class="burger" type="button" id="burger" aria-expanded="false" aria-controls="menu" aria-label="Menu"><span></span><span></span></button>
   </div>
 </header>
@@ -118,7 +118,7 @@
 <!-- phone: one sticky way into the club -->
 <div class="joinbar" id="joinbar" aria-hidden="true">
   <span class="joinbar-txt"><b>Small Batch Club</b><span data-en="150 founder numbers · from 995 kr.">150 stifternumre · fra 995 kr.</span></span>
-  <a class="btn btn--sm" data-join="bar-sticky" href="#club" target="_blank" rel="noopener" tabindex="-1"><span data-en="Sign up ↗">Skriv mig op ↗</span></a>
+  <a class="btn btn--sm" data-join="bar-sticky" href="#club" target="_blank" rel="noopener" tabindex="-1"><span data-en="Pick a number ↗">Vælg nummer ↗</span></a>
 </div>
 
 <main class="main" id="main">
@@ -175,9 +175,10 @@
     <div class="club-light" id="clubLight" aria-hidden="true"></div>
     <div class="wrap">
       <header class="club-head">
-        <span class="label club-kicker" data-scramble data-en="(02) Small Batch Club · Small. On purpose.">(02) Small Batch Club · Lille. Med vilje.</span>
-        <h2 class="club-title disp" id="clubTitle"><span data-en="150 numbers.">150 numre.</span> <span class="it" data-en="Sign up first.">Skriv dig op først.</span></h2>
-        <p class="club-lede" data-en="In 2027 we open the first 150 of the club's 300 numbers – the rest in 2028. Each one is burned into a wooden bottle, turned on Bornholm.">I 2027 åbner vi de første 150 af klubbens 300 numre – resten i 2028. Hvert nummer bliver brændt ind i en træflaske, drejet på Bornholm.</p>
+        <span class="label club-kicker" data-scramble data-en="(02) Small Batch Club · Club year 2027">(02) Small Batch Club · Klubåret 2027</span>
+        <h2 class="club-title disp" id="clubTitle"><span data-en="150 numbers.">150 numre.</span> <span class="it" data-en="On purpose.">Med vilje.</span></h2>
+        <p class="club-lede" data-en="In 2027 we open the first 150 of the club's 300 numbers – the rest in 2028. Each one is burned into a wooden bottle, turned on Bornholm, and engraved in a card of black aluminium.">I 2027 åbner vi de første 150 af klubbens 300 numre – resten i 2028. Hvert nummer bliver brændt ind i en træflaske, drejet på Bornholm, og graveret i et kort af sort aluminium.</p>
+        <p class="club-count" id="clubCount"></p>
       </header>
 
       <!-- the board: 300 marks, 150 open in 2027 -->
@@ -190,37 +191,69 @@
         </figcaption>
       </figure>
 
-      <!-- the kit: card, wooden bottle, club beers, the tee's chest print -->
+      <!-- the kit: one lit ledge – the aluminium card (front + back), wooden bottle, club beers, the tee's print -->
       <div class="kit" id="kit">
-        <div class="kit-stage" aria-hidden="true">
+        <div class="kit-head">
+          <div>
+            <span class="label" data-en="The welcome pack">Velkomstpakken</span>
+            <h3 data-en="It comes with the number.">Det følger med nummeret.</h3>
+          </div>
+          <p data-en="Over the counter in Nexø – or shipped to your door in Denmark.">Over disken i Nexø – eller sendt hjem i Danmark.</p>
+        </div>
+        <div class="kit-stage" role="img" aria-label="Velkomstpakken: medlemskortet for og bag, træflasken, to klubøl og t-shirtens tryk. Skitse." data-en-aria-label="The welcome pack: the member card front and back, the wooden bottle, two club beers and the t-shirt's print. Sketch.">
           <span class="kit-glow"></span>
-          <span class="chest"><span class="chest-print"><svg class="tp-svg" viewBox="0 -1 100 36.50" fill="currentColor"><use href="#wm-line" x="10" y="0" width="80" height="15.5"/><text x="10" y="25.9" style="font-family:'Instrument Sans',sans-serif;font-size:4.2px;font-weight:700;letter-spacing:.55em">CLUB</text><text x="10" y="31.9" style="font-family:'Instrument Sans',sans-serif;font-size:4.2px;font-weight:700;letter-spacing:.42em">2027</text><use href="#sb-hop" x="38.21" y="20.47" width="10.42" height="14"/><text x="58.49" y="31.5" style="font-family:Rokkitt,Georgia,serif;font-size:11.5px;font-weight:600">N</text><text x="66.77" y="27.36" style="font-family:Rokkitt,Georgia,serif;font-size:5.75px;font-weight:600">o</text><rect x="67" y="28.62" width="2.88" height=".69"/><text class="js-num-svg" x="72.75" y="31.5" style="font-family:Rokkitt,Georgia,serif;font-size:11.5px;font-weight:600">047</text></svg></span></span>
           <div class="kit-ledge">
             <span class="wb"><img src="assets/club/wood-520.webp" alt="" width="520" height="1930" loading="lazy" decoding="async"><span class="wb-num" id="wbNum"><span class="no">N<span>o</span></span> <b class="js-num">047</b> · 2027</span></span>
             <img class="kit-beer" src="assets/club/batch01-400.webp" alt="" width="400" height="1578" loading="lazy" decoding="async">
             <img class="kit-beer" src="assets/club/batch02-400.webp" alt="" width="400" height="1577" loading="lazy" decoding="async">
           </div>
-          <div class="mcard" id="mcard">
+          <span class="chest"><span class="chest-print"><svg class="tp-svg" viewBox="0 -1 100 36.50" fill="currentColor"><use href="#wm-line" x="10" y="0" width="80" height="15.5"/><text x="10" y="25.9" style="font-family:'Instrument Sans',sans-serif;font-size:4.2px;font-weight:700;letter-spacing:.55em">CLUB</text><text x="10" y="31.9" style="font-family:'Instrument Sans',sans-serif;font-size:4.2px;font-weight:700;letter-spacing:.42em">2027</text><use href="#sb-hop" x="38.21" y="20.47" width="10.42" height="14"/><text x="58.49" y="31.5" style="font-family:Rokkitt,Georgia,serif;font-size:11.5px;font-weight:600">N</text><text x="66.77" y="27.36" style="font-family:Rokkitt,Georgia,serif;font-size:5.75px;font-weight:600">o</text><rect x="67" y="28.62" width="2.88" height=".69"/><text class="js-num-svg" x="72.75" y="31.5" style="font-family:Rokkitt,Georgia,serif;font-size:11.5px;font-weight:600">047</text></svg></span></span>
+          <div class="mcard mcard-back">
             <div class="mcard-in">
               <span class="mcard-wm"></span>
-              <span class="mcard-club">Club</span>
-              <span class="mcard-no"><small><span class="no">N<span>o</span></span></small><b id="mcardNum">047</b></span>
-              <span class="mcard-name" id="mcardName">Dit navn</span>
-              <span class="mcard-meta"><span id="mcardTier">Medlem</span> · <span id="mcardYear">Klubåret 2027</span></span>
+              <span class="mcard-club">Klubåret 2027</span>
+              <span class="mcard-no"><small><span class="no">N<span>o</span></span></small><b class="js-num">047</b></span>
+              <span class="mcard-of">af 150</span>
+              <img class="mcard-qr" src="assets/club/card-qr.svg" alt="" width="33" height="33" loading="lazy">
+              <span class="mcard-scan">Scan</span>
+              <span class="mcard-glint"></span>
             </div>
           </div>
-          <span class="sketch kit-sketch" data-en="Sketch – the real ones are made on Bornholm">Skitse – de rigtige laves på Bornholm</span>
-        </div>
-        <div class="kit-copy">
-          <span class="label" data-en="Try your card">Prøv dit kort</span>
-          <h3 data-en="Which number do you wish for?">Hvilket nummer ønsker du dig?</h3>
-          <p data-en="Burned into the wooden bottle, printed on the staff's black t-shirt and on the member card. Stay next year and you keep it.">Brændt i træflasken, trykt på personalets sorte t-shirt og på medlemskortet. Bliver du næste år, beholder du det.</p>
-          <div class="kit-fields">
-            <label class="field field--num"><span class="label" data-en="Number">Nummer</span><span class="numin"><span class="no" aria-hidden="true">N<span>o</span></span><input id="cNum" inputmode="numeric" autocomplete="off" maxlength="3" value="047" aria-describedby="cNote"></span></label>
-            <label class="field"><span class="label" data-en="Name on the card">Navn på kortet</span><input id="cName" type="text" autocomplete="off" maxlength="26" placeholder="Dit navn" data-en-placeholder="Your name"></label>
+          <div class="mcard mcard-front" id="mcard">
+            <div class="mcard-in">
+              <span class="mcard-rings"></span>
+              <span class="mcard-wm"></span>
+              <span class="mcard-club">Club 2027</span>
+              <span class="mcard-no"><small><span class="no">N<span>o</span></span></small><b id="mcardNum">047</b></span>
+              <span class="mcard-name" id="mcardName">Dit navn</span>
+              <span class="mcard-glint"></span>
+            </div>
           </div>
-          <button type="button" class="btn btn--ghost btn--sm" id="cSuggest"><span data-en="Suggest a number">Foreslå et nummer</span></button>
-          <p class="kit-note" id="cNote" aria-live="polite"></p>
+        </div>
+        <div class="kit-foot">
+          <ol class="kit-list">
+            <li><span>01</span><b data-en="The wooden bottle">Træflasken</b></li>
+            <li><span>02 · 03</span><b data-en="Two club beers">To klubøl</b></li>
+            <li><span>04</span><b data-en="The member card">Medlemskortet</b></li>
+            <li><span>05</span><b data-en="The black t-shirt">Den sorte t-shirt</b></li>
+          </ol>
+          <span class="sketch" data-en="All pictures of the pack are sketches.">Alle billeder af pakken er skitser.</span>
+        </div>
+        <div class="kit-row">
+          <div class="kit-copy">
+            <span class="label" data-en="The member card">Medlemskortet</span>
+            <h3 data-en="Your name. Your number. In&nbsp;your&nbsp;pocket.">Dit navn. Dit nummer. I&nbsp;lommen.</h3>
+            <p data-en="Black aluminium, the size of a bank card, with your name and your number engraved so they show as bright metal. The growth rings on the front are drawn from your number, so no two cards are alike.">Sort aluminium i samme størrelse som et betalingskort, med dit navn og dit nummer graveret, så de står som blankt metal. Årringene på forsiden tegnes ud fra dit nummer, så ingen to kort er ens.</p>
+          </div>
+          <div class="kit-try">
+            <span class="label" data-en="Try your card">Prøv dit kort</span>
+            <div class="kit-fields">
+              <label class="field field--num"><span class="label" data-en="Number">Nummer</span><span class="numin"><span class="no" aria-hidden="true">N<span>o</span></span><input id="cNum" inputmode="numeric" autocomplete="off" maxlength="3" value="047" aria-describedby="cNote"></span></label>
+              <label class="field"><span class="label" data-en="Name on the card">Navn på kortet</span><input id="cName" type="text" autocomplete="off" maxlength="26" placeholder="Dit navn" data-en-placeholder="Your name"></label>
+            </div>
+            <button type="button" class="btn btn--ghost btn--sm" id="cSuggest"><span data-en="Suggest a number">Foreslå et nummer</span></button>
+            <p class="kit-note" id="cNote" aria-live="polite"></p>
+          </div>
         </div>
       </div>
 
@@ -233,10 +266,9 @@
       </div>
 
       <div class="club-cta" id="clubCta">
-        <a class="btn btn--lg magnetic" data-join="bar-club" href="#club" target="_blank" rel="noopener"><span class="btn-dot"></span><span data-en="Join the founders' list ↗">Skriv mig på stifterlisten ↗</span></a>
+        <a class="btn btn--lg magnetic" data-join="bar-club" href="#club" target="_blank" rel="noopener"><span class="btn-dot"></span><span data-en="Pick your number ↗">Vælg dit nummer ↗</span></a>
         <div class="club-cta-txt">
-          <p data-en="No payment, no commitment. We write when sales open – and numbers go in sign-up order. The list is in Danish.">Ingen betaling, ingen binding. Vi skriver, når salget åbner – og numrene vælges i den rækkefølge, I skriver jer op.</p>
-          <a class="clink" data-club-link="" href="#club" target="_blank" rel="noopener" data-en="See the whole club ↗">Se hele klubben ↗</a>
+          <p data-en="The club page has it all: the numbers, the pack, the evenings and the memberships. It takes no payments or reservations yet.">På klubsiden står det hele: numrene, pakken, aftenerne og medlemskaberne. Den tager ikke imod betalinger eller reservationer endnu.</p>
         </div>
       </div>
       <p class="club-disclaimer" data-en="A concept proposal for Small Batch and Svaneke Bryghus – not a real club yet.">Konceptforslag til Small Batch og Svaneke Bryghus – ikke en rigtig klub endnu.</p>
@@ -369,8 +401,9 @@
     </div>
     <div class="footer-col">
       <span class="label">Small Batch Club</span>
-      <a data-join="bar-footer" href="#club" target="_blank" rel="noopener" data-en="The founders' list ↗">Stifterlisten ↗</a>
+      <a data-join="bar-footer" href="#club" target="_blank" rel="noopener" data-en="Pick your number ↗">Vælg dit nummer ↗</a>
       <a data-club-link="" href="#club" target="_blank" rel="noopener" data-en="The whole club ↗">Hele klubben ↗</a>
+      <a href="https://small-batch-klubkontor.vercel.app/medlem" target="_blank" rel="noopener" data-en="Member? Log in ↗">Allerede medlem? Log ind ↗</a>
     </div>
   </div>
   <div class="footer-logo-wrap"><span class="footer-glow" aria-hidden="true"></span><svg class="footer-logo" viewBox="0 0 1010 665" aria-hidden="true"><use href="#sb-logo"/></svg></div>
@@ -388,7 +421,7 @@
 <script src="assets/vendor/gsap.min.js"></script>
 <script src="assets/vendor/ScrollTrigger.min.js"></script>
 <script src="assets/vendor/lenis.min.js"></script>
-<script src="assets/js/config.js?v=202610252227"></script>
-<script src="assets/js/main.js?v=202610252227"></script>
+<script src="assets/js/config.js?v=202611022106"></script>
+<script src="assets/js/main.js?v=202611022106"></script>
 </body>
 </html>

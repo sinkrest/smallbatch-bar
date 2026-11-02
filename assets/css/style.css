@@ -244,7 +244,8 @@ input, textarea { font: inherit; color: inherit; }
 .club-head { max-width: 1100px; }
 .club-title { margin: 20px 0 0; font-size: clamp(72px, 11.5vw, 196px); }
 .club-title .it { display: block; font-stretch: 85%; color: var(--bone-2); }
-.club-lede { margin: 26px 0 0; max-width: 54ch; font-size: clamp(18px, 1.5vw, 21px); color: var(--bone-2); }
+.club-lede { margin: 26px 0 0; max-width: 58ch; font-size: clamp(18px, 1.5vw, 21px); color: var(--bone-2); }
+.club-count { margin: 16px 0 0; font: 400 16px/1.3 var(--slab); letter-spacing: .08em; color: var(--bone-3); }
 
 /* the board: 300 marks */
 .tally { margin: clamp(50px, 6vw, 84px) 0 0; }
@@ -262,23 +263,31 @@ input, textarea { font: inherit; color: inherit; }
 .t-next i { opacity: .25; }
 @media (max-width: 760px) { .tally-marks { grid-template-columns: repeat(25, minmax(0, 1fr)); row-gap: 9px; } .tally-marks i { height: 18px; } }
 
-/* the kit: card, wooden bottle, club beers and the tee's print under one light */
-.kit { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, .75fr); gap: clamp(30px, 5vw, 80px); align-items: center; margin-top: clamp(70px, 8vw, 120px); }
-.kit-stage { position: relative; width: 100%; max-width: 780px; aspect-ratio: 1.22; container-type: inline-size; }
-.kit-glow { position: absolute; inset: -12% -8% -4% -8%; pointer-events: none; background: radial-gradient(42% 46% at 62% 50%, rgba(255, 120, 40, .22), rgba(255, 85, 0, .06) 55%, transparent 74%); }
-.kit-ledge { position: absolute; right: 2cqw; bottom: 8cqw; display: flex; align-items: flex-end; gap: 3cqw; }
-.kit-ledge::after { content: ""; position: absolute; left: -60cqw; right: -6cqw; bottom: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(240, 237, 231, .22) 30%, rgba(255, 140, 60, .45) 75%, transparent); }
-.kit-beer { width: 14.6cqw; height: auto; filter: drop-shadow(0 12px 14px rgba(0, 0, 0, .6)); }
-.kit-ledge .wb { width: 15.6cqw; order: 3; filter: drop-shadow(0 12px 14px rgba(0, 0, 0, .6)); }
-.kit-stage .mcard { position: absolute; left: 0; bottom: 6cqw; width: 56cqw; z-index: 2; transform: rotate(-7deg); transform-origin: 0 100%; }
-.kit-stage .mcard-in { --rx: 6deg; --ry: -12deg; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .14), inset 0 0 0 1px rgba(255, 255, 255, .07), inset 0 0 0 6px #0f0c0a, inset 0 0 0 7px rgba(240, 237, 231, .1), 0 40px 70px -24px rgba(0, 0, 0, .95), 0 2px 3px rgba(0, 0, 0, .6); }
-.chest { position: absolute; left: 5cqw; top: 1cqw; width: 26cqw; aspect-ratio: 1; border-radius: 50%; overflow: hidden; background: #0d0b09 url("../club/tee-960.webp") no-repeat 67.3% 11.2% / 369% auto; box-shadow: 0 0 0 1px rgba(240, 237, 231, .22), 0 24px 50px -20px rgba(0, 0, 0, .9), inset 0 0 36px rgba(0, 0, 0, .6); }
+/* the kit: one lit ledge – the aluminium card (front + back), bottle, beers, tee print */
+.kit { margin-top: clamp(70px, 8vw, 120px); }
+.kit-head { display: grid; grid-template-columns: 1fr auto; gap: 14px 24px; align-items: end; margin-bottom: clamp(20px, 3vw, 36px); }
+.kit-head h3, .kit-copy h3 { margin: 14px 0 0; font: 700 clamp(34px, 3.8vw, 58px)/.95 var(--sans); font-stretch: 78%; letter-spacing: -.01em; text-transform: uppercase; }
+.kit-head p { margin: 0; color: var(--bone-3); max-width: 34ch; }
+.kit-stage { position: relative; width: 100%; aspect-ratio: 2.1; container-type: inline-size; }
+.kit-glow { position: absolute; inset: -8% -4% -4%; pointer-events: none; background: radial-gradient(40% 58% at 66% 52%, rgba(255, 120, 40, .2), rgba(255, 85, 0, .05) 58%, transparent 76%), radial-gradient(34% 56% at 22% 56%, rgba(255, 214, 170, .07), transparent 72%); }
+.kit-ledge { position: absolute; left: 51cqw; bottom: 3cqw; display: flex; align-items: flex-end; gap: 1.6cqw; }
+.kit-ledge::after { content: ""; position: absolute; left: -51cqw; right: -17cqw; bottom: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(240, 237, 231, .2) 25%, rgba(255, 140, 60, .42) 72%, transparent); }
+.kit-beer { width: 9.8cqw; height: auto; filter: drop-shadow(0 10px 14px rgba(0, 0, 0, .6)); }
+.kit-ledge .wb { width: 10.4cqw; order: 3; filter: drop-shadow(0 10px 14px rgba(0, 0, 0, .6)); }
+.kit-stage .mcard { position: absolute; width: 33.5cqw; --rx: 3deg; --ry: -5deg; }
+.kit-stage .mcard-back { left: 13cqw; top: 2cqw; transform: rotate(4deg); }
+.kit-stage .mcard-front { left: 0; bottom: 3cqw; transform: rotate(-3deg); z-index: 2; }
+.chest { position: absolute; right: 0; top: 12cqw; width: 14.5cqw; aspect-ratio: 1; border-radius: 50%; overflow: hidden; background: #0d0b09 url("../club/tee-960.webp") no-repeat 67.3% 11.2% / 369% auto; box-shadow: 0 0 0 1px rgba(240, 237, 231, .22), 0 24px 50px -20px rgba(0, 0, 0, .9), inset 0 0 36px rgba(0, 0, 0, .6); }
 .chest-print { position: absolute; left: 19%; top: 38.7%; width: 62%; color: #f05a12; -webkit-mask: url("../club/print-grain.png") 0 0 / 40% repeat; mask: url("../club/print-grain.png") 0 0 / 40% repeat; }
 .tp-svg { display: block; width: 100%; height: auto; overflow: visible; }
-.kit-sketch { position: absolute; left: 0; bottom: -4px; margin: 0; }
-.kit-copy h3 { margin: 16px 0 14px; font: 700 clamp(34px, 3.6vw, 56px)/.95 var(--sans); font-stretch: 78%; letter-spacing: -.01em; text-transform: uppercase; }
-.kit-copy > p { color: var(--bone-2); max-width: 42ch; margin: 0; }
-.kit-fields { display: grid; grid-template-columns: 150px 1fr; gap: 22px; margin: 30px 0 22px; }
+.kit-foot { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 12px 28px; margin-top: 18px; }
+.kit-list { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px 28px; }
+.kit-list li { display: inline-flex; align-items: baseline; gap: 8px; }
+.kit-list span { font: 400 13px/1 var(--slab); letter-spacing: .12em; color: var(--ember); }
+.kit-list b { font-size: 15px; font-weight: 500; color: var(--bone-2); }
+.kit-row { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr); gap: clamp(30px, 6vw, 96px); align-items: start; margin-top: clamp(44px, 5vw, 72px); padding-top: clamp(30px, 3.4vw, 46px); border-top: 1px solid var(--line); }
+.kit-copy p { color: var(--bone-2); max-width: 50ch; margin: 16px 0 0; }
+.kit-fields { display: grid; grid-template-columns: 150px 1fr; gap: 22px; margin: 18px 0 20px; }
 .field { display: grid; gap: 8px; }
 .field input { width: 100%; height: 52px; border: 0; border-bottom: 1px solid rgba(240, 237, 231, .32); border-radius: 0; background: transparent; padding: 0 2px; font: 500 19px/1 var(--sans); color: var(--bone); transition: border-color .3s; }
 .field input:focus { border-bottom-color: var(--blaze); outline: none; }
@@ -288,17 +297,20 @@ input, textarea { font: inherit; color: inherit; }
 .numin:focus-within { border-bottom-color: var(--blaze); box-shadow: 0 2px 0 var(--blaze); }
 .numin .no { font: 300 32px/1 var(--slab); color: var(--bone-3); }
 .field--num input { border: 0; font: 400 38px/1 var(--slab); letter-spacing: .06em; height: 56px; }
-.kit-note { min-height: 3em; margin: 16px 0 0; font-size: 14.5px; line-height: 1.5; color: var(--bone-3); max-width: 44ch; }
+.kit-note { min-height: 1.5em; margin: 14px 0 0; font-size: 14.5px; line-height: 1.5; color: var(--bone-3); max-width: 46ch; }
 .kit-note.is-table { color: var(--bone-2); }
 .kit-note.is-table::before { content: ""; display: inline-block; width: 22px; height: 2px; background: var(--blaze); vertical-align: middle; margin-right: 10px; }
-@media (max-width: 1020px) { .kit { grid-template-columns: 1fr; } .kit-stage { margin-inline: auto; } }
-@media (max-width: 560px) {
-  .kit-stage { aspect-ratio: .98; }
-  .kit-stage .mcard { width: 72cqw; bottom: 7cqw; }
-  .kit-ledge { bottom: 9cqw; }
-  .kit-ledge > img.kit-beer:first-of-type { display: none; }
-  .kit-beer { width: 17cqw; } .kit-ledge .wb { width: 18cqw; }
-  .chest { width: 34cqw; left: 2cqw; }
+@media (max-width: 1020px) { .kit-row { grid-template-columns: 1fr; } }
+@media (max-width: 760px) {
+  .kit-head { grid-template-columns: 1fr; }
+  .kit-stage { aspect-ratio: .64; }
+  .kit-stage .mcard { width: 74cqw; }
+  .kit-stage .mcard-back { left: auto; right: 1cqw; top: 2cqw; }
+  .kit-stage .mcard-front { left: 1cqw; top: 44cqw; bottom: auto; }
+  .kit-ledge { left: auto; right: 3cqw; bottom: 4cqw; gap: 2.4cqw; }
+  .kit-ledge::after { left: -60cqw; right: -3cqw; }
+  .kit-beer { width: 16.4cqw; } .kit-ledge .wb { width: 17.6cqw; }
+  .chest { right: auto; left: 3cqw; top: auto; bottom: 16cqw; width: 34cqw; }
   .kit-fields { grid-template-columns: 130px 1fr; gap: 16px; }
 }
 
@@ -315,23 +327,36 @@ input, textarea { font: inherit; color: inherit; }
   100% { color: #2a1205; mix-blend-mode: multiply; text-shadow: 0 0 .22em rgba(150, 70, 20, .5), 0 0 .05em rgba(70, 30, 8, .9); }
 }
 
-/* the member card: matte black stock, a foil number (identical to the concept) */
-.mcard { --rx: 0deg; --ry: 0deg; width: min(340px, 100%); aspect-ratio: 1.586; perspective: 900px; }
-.mcard-in { position: relative; display: block; width: 100%; height: 100%; text-align: left; border-radius: var(--r); padding: 7% 7.5%; color: var(--bone); overflow: hidden; transform: rotateX(var(--rx)) rotateY(var(--ry)); transition: transform .5s var(--ease); background: linear-gradient(160deg, #1a1612, #0b0907 70%); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .07), inset 0 0 0 6px #0f0c0a, inset 0 0 0 7px rgba(240, 237, 231, .1), 0 30px 60px -24px rgba(0, 0, 0, .9), 0 2px 3px rgba(0, 0, 0, .6); container-type: inline-size; }
-.mcard-in::before { content: ""; position: absolute; inset: 0; background: url("../club/grain.png"); opacity: .06; pointer-events: none; }
-.mcard-in::after { content: ""; position: absolute; inset: -20%; pointer-events: none; background: radial-gradient(38% 30% at var(--mx, 30%) var(--my, 20%), rgba(255, 214, 170, .16), transparent 70%); opacity: 0; transition: opacity .5s; }
-.kit:hover .mcard-in::after { opacity: 1; }
-.mcard-wm { position: absolute; left: 9%; top: 11%; width: 32%; aspect-ratio: 702 / 136; background: var(--blaze); -webkit-mask: url("../img/wordmark.svg") no-repeat left center / contain; mask: url("../img/wordmark.svg") no-repeat left center / contain; }
-.mcard-club { position: absolute; left: 44%; top: 11.6%; font: 600 3cqw/1 var(--sans); letter-spacing: .34em; text-transform: uppercase; color: var(--bone-2); }
-.mcard-no { position: absolute; left: 9%; bottom: 31%; display: flex; align-items: baseline; gap: 1cqw; }
-.mcard-no small { font: 400 8cqw/1 var(--slab); color: var(--bone-2); }
-.mcard-no b { font: 400 21cqw/.8 var(--slab); letter-spacing: .01em; background: linear-gradient(100deg, #c94300 0, #ff5500 30%, #ffb27a 45%, #ff5500 60%, #c94300 100%); background-size: 250% 100%; background-position: 100% 0; -webkit-background-clip: text; background-clip: text; color: transparent; transition: background-position 1s ease-out; }
-.kit:hover .mcard-no b { background-position: 0 0; }
+/* the member card: black anodised aluminium in bank-card size, name and number
+   engraved as bright metal. Identical to the concept (club.css .mcard, 1 mm = 1.168cqw) */
+.mcard { --rx: 0deg; --ry: 0deg; --metal: #d9d4cb; width: min(340px, 100%); aspect-ratio: 85.6 / 53.98; perspective: 900px; }
+.mcard-in { position: relative; display: block; width: 100%; height: 100%; text-align: left; border-radius: 3.72% / 5.9%; color: var(--metal); overflow: hidden; transform: rotateX(var(--rx)) rotateY(var(--ry)); transition: transform .5s var(--ease); background: linear-gradient(135deg, #2a2a2f, #131315 45%, #1f1f24 62%, #0d0d0f); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .13), 0 30px 60px -24px rgba(0, 0, 0, .9), 0 2px 3px rgba(0, 0, 0, .6); container-type: inline-size; }
+.mcard-in::before { content: ""; position: absolute; inset: 0; background: repeating-linear-gradient(180deg, rgba(255, 255, 255, .022) 0 1px, transparent 1px 3px); pointer-events: none; }
+.mcard-in::after { content: ""; position: absolute; inset: -20%; pointer-events: none; background: radial-gradient(38% 30% at var(--mx, 30%) var(--my, 20%), rgba(255, 255, 255, .2), transparent 70%); opacity: 0; transition: opacity .5s; }
+.kit-stage:hover .mcard-in::after { opacity: 1; }
+.mcard-rings { position: absolute; inset: 0; background: url("../club/card-rings.svg") no-repeat center / 100% 100%; }
+.mcard-wm { position: absolute; left: 7cqw; top: 7.24cqw; width: 29.2cqw; aspect-ratio: 1010 / 665; background: var(--metal); -webkit-mask: url("../club/card-wm-stack.svg") no-repeat left top / contain; mask: url("../club/card-wm-stack.svg") no-repeat left top / contain; }
+.mcard-club { position: absolute; left: 7cqw; top: 28.9cqw; font: 500 3.9cqw/1 var(--sans); letter-spacing: .28em; text-transform: uppercase; color: var(--metal); white-space: nowrap; }
+.mcard-no { position: absolute; right: 6.07cqw; bottom: 6.54cqw; display: flex; align-items: flex-start; gap: .8cqw; line-height: 1; }
+.mcard-no small { font: 700 7.6cqw/.7 var(--slab); color: var(--metal); }
+.mcard-no b { display: block; font: 700 31cqw/.7 var(--slab); letter-spacing: 0; background: linear-gradient(100deg, #bfbab1 0, #e4dfd6 30%, #fff 45%, #e4dfd6 60%, #bfbab1 100%); background-size: 250% 100%; background-position: 100% 0; -webkit-background-clip: text; background-clip: text; color: transparent; transition: background-position 1s ease-out; }
+.kit-stage:hover .mcard-no b { background-position: 0 0; }
 .mcard-no b.is-foil { animation: foil 1.1s ease-out both; }
 @keyframes foil { from { background-position: 100% 0; } to { background-position: 0 0; } }
-.mcard-name { position: absolute; left: 9%; right: 9%; bottom: 16%; font: 500 5cqw/1.1 var(--sans); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.mcard-meta { position: absolute; left: 9%; bottom: 8.5%; font: 600 3.1cqw/1 var(--sans); letter-spacing: .14em; text-transform: uppercase; color: var(--bone-3); }
-.mcard.is-table #mcardTier { color: var(--blaze); }
+.mcard-name { position: absolute; left: 7cqw; bottom: 6.3cqw; width: 31cqw; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; overflow-wrap: anywhere; padding-top: 2.9cqw; font: 500 4.6cqw/1.2 var(--sans); letter-spacing: .2em; text-transform: uppercase; color: var(--metal); background: linear-gradient(var(--metal), var(--metal)) no-repeat left top / 8.2cqw .55cqw; }
+/* the back: line wordmark, the number, and the code */
+.mcard-back .mcard-wm { top: 7cqw; width: 39.7cqw; aspect-ratio: 702 / 136; -webkit-mask-image: url("../club/card-wm-line.svg"); mask-image: url("../club/card-wm-line.svg"); }
+.mcard-back .mcard-club { top: 19cqw; font-size: 3.7cqw; }
+.mcard-back .mcard-no { right: auto; left: 7cqw; bottom: 15.2cqw; }
+.mcard-back .mcard-no small { font-size: 4.6cqw; }
+.mcard-back .mcard-no b { font-size: 18.4cqw; }
+.mcard-of { position: absolute; left: 7cqw; bottom: 7cqw; font: 500 4cqw/1 var(--sans); letter-spacing: .28em; text-transform: uppercase; }
+.mcard-qr { position: absolute; right: 6.3cqw; top: 7cqw; width: 33.9cqw; height: 33.9cqw; }
+.mcard-scan { position: absolute; right: 6.3cqw; top: 44.8cqw; width: 33.9cqw; text-align: center; font: 500 3.7cqw/1 var(--sans); letter-spacing: .4em; text-transform: uppercase; }
+/* a glint across the metal when the number changes (transform only) */
+.mcard-glint { position: absolute; inset: 0; pointer-events: none; background: linear-gradient(105deg, transparent 38%, rgba(255, 255, 255, .2) 50%, transparent 62%); transform: translateX(-120%); }
+.mcard.is-glint .mcard-glint { animation: glint 1.2s var(--ease) both; }
+@keyframes glint { to { transform: translateX(120%); } }
 
 /* the ladder – one line per membership, no boxes, no "most popular" */
 .ladder { margin-top: clamp(80px, 9vw, 130px); }

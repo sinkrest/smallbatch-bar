@@ -12,9 +12,15 @@ window.SB_CONFIG = {
          not agreed with Small Batch yet)
        · 2027 opens Nº 001–150 (the founders), all 300 from 2028
        · guest tickets 0 / 1 / 2 – only for Første tap and Klubaftenen
-       · pre-sale = the founders' list; numbers go in sign-up order
+       · the member card is black anodised aluminium, bank-card size; its back
+         says "af 150" in 2027. Art: tools/medlemskort_web.py in the concept,
+         copied to assets/club/card-*.svg
      ---------------------------------------------------------------------- */
-  joinUrl: "https://small-batch-koncept.vercel.app/klubben/",   // ?fra=<placement> is added per button. Not the founders' list until it is approved and stores for real (2026-10-31)
+  /* Empty: every club button opens the club page at the number picker.
+     Stifterlisten is not open yet (not approved, and it only saves to the back
+     office's demo memory). When it opens, set its URL here and change the labels
+     back to "Skriv mig op". ?fra=<placement> is added per button either way. */
+  joinUrl: "",
   clubUrl: {
     da: "https://small-batch-koncept.vercel.app/klubben/",
     en: "https://small-batch-koncept.vercel.app/en/club/"
@@ -68,14 +74,14 @@ window.SB_CONFIG = {
 
   /* ----------------------------------------------------------------------
      THE BOARD – house range, light to dark. Notes follow the brewery's own
-     descriptions (small-batch/src/data/beers.json); IBU per Untappd.
+     descriptions and IBU (small-batch/src/data/beers.json).
      % vol. is shown neutrally, never as a selling point.
      tag: "" | "award" | "club"
      ---------------------------------------------------------------------- */
   taps: [
     { name: "Rønne Bækker", style: { da: "Sydtysk pilsner", en: "South German pilsner" }, notes: { da: "Crisp, balanceret bitterhed og velhumlet.", en: "Crisp, balanced bitterness, well hopped." }, abv: 5.0, ibu: 23, color: "#f3d36b" },
-    { name: "No. 1", style: { da: "American pale ale", en: "American pale ale" }, notes: { da: "Et godt bid fra humlen, uden at det bliver overdøvende.", en: "A good bite of hops, never overpowering." }, abv: 4.8, ibu: 28, color: "#e9b04a" },
-    { name: "Every Day IPA", style: { da: "Frugtig hverdags-IPA", en: "Fruity everyday IPA" }, notes: { da: "Tørhumlet med amerikanske humler. Bitterheden i kort snor.", en: "Dry-hopped with American hops. Bitterness on a short leash." }, abv: 5.6, ibu: 40, color: "#f0a630" },
+    { name: "No. 1", style: { da: "American pale ale", en: "American pale ale" }, notes: { da: "Et godt bid fra humlen, uden at det bliver overdøvende.", en: "A good bite of hops, never overpowering." }, abv: 4.8, ibu: 30, color: "#e9b04a" },
+    { name: "Every Day IPA", style: { da: "Frugtig hverdags-IPA", en: "Fruity everyday IPA" }, notes: { da: "Tørhumlet med amerikanske humler. Bitterheden i kort snor.", en: "Dry-hopped with American hops. Bitterness on a short leash." }, abv: 5.6, ibu: 38, color: "#f0a630" },
     { name: "Krush IPA", style: { da: "India pale ale", en: "India pale ale" }, notes: { da: "Tropiske frugtnoter og et strejf af citrus.", en: "Tropical fruit and a touch of citrus." }, abv: 5.8, ibu: 51, color: "#eb9a2a" },
     { name: "Havtorn", style: { da: "Pale ale med havtorn", en: "Sea buckthorn pale ale" }, notes: { da: "Havtornbær fra Høstet. Let syrlig, masser af citrus.", en: "Sea buckthorn from Høstet. Lightly tart, plenty of citrus." }, abv: 5.5, ibu: 36, color: "#f08a24" },
     { name: "Back in Black", style: { da: "Dark India ale", en: "Dark India ale" }, notes: { da: "De mørke maltes kaffe møder Cascade-humlens citrus.", en: "Dark-malt coffee meets Cascade citrus." }, abv: 6.3, ibu: 49, color: "#22160f", tag: "award", award: { da: "Delt 6. plads, Årets Ølnyhed 2018", en: "Shared 6th, New Danish Beer of the Year 2018" } },

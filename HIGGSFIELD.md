@@ -82,8 +82,8 @@ sun over a harbour. Silhouettes only, 35mm grain, 21:9 cinematic.
 ## 5. Batch Film Nº 03: "Klubben" (The Club)
 
 ```
-Cinematic 21:9, night. A matte-black member card with an orange foil number slides across a dark
-wooden bar top under a single orange light; beside it a turned wooden bottle with a number burned
+Cinematic 21:9, night. A black anodised aluminium member card, bank-card size, with its number
+engraved as bright metal, slides across a dark wooden bar top under a single orange light; beside it a turned wooden bottle with a number burned
 into the wood. Slow push-in, deep blacks, orange highlights, 35mm film grain. No faces, no text.
 ```
 
